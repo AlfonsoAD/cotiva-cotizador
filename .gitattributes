@@ -1,0 +1,12 @@
+# Codigo VBA: UTF-8 en el repositorio, Windows-1252 + CRLF en la carpeta de trabajo
+# (el editor de VBA necesita Windows-1252 para importar acentos correctamente)
+*.bas text eol=crlf working-tree-encoding=CP1252
+*.cls text eol=crlf working-tree-encoding=CP1252
+*.vba text eol=crlf working-tree-encoding=CP1252
+
+*.ps1 text eol=crlf
+*.md  text eol=lf
+
+*.xlsm binary
+*.png  binary
+*.jpg  binary

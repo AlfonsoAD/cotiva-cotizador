@@ -1,0 +1,9 @@
+# Salida del build (el .xlsm se publica como Release, no en el repo)
+dist/
+
+# Clave privada: nunca se sube
+src/modules/modSecrets.bas
+
+# Archivos temporales de Office
+~$*
+*.tmp
