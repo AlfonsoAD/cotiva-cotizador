@@ -456,7 +456,12 @@ End Function
 
 ' Fecha de una celda; 0 si no es fecha.
 Private Function CellDate(ByVal v As Variant) As Date
-    If IsDate(v) Then CellDate = CDate(v)
+    If IsDate(v) Then
+        CellDate = CDate(v)
+    ElseIf VarType(v) = vbDouble Then
+        ' Excel entrega como Double una hora sola (0.6041 = 14:30)
+        If v >= 0 And v < 2958466 Then CellDate = CDate(v)
+    End If
 End Function
 
 ' Fecha para escribir en la hoja: 0 ("sin valor") se guarda como celda vacia.
