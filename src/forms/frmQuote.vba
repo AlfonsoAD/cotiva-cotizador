@@ -56,13 +56,6 @@ Private Const FORM_WIDTH As Single = 660
 Private Const FORM_HEIGHT As Single = 496
 Private Const MARGIN As Single = 18
 
-' Estilos de botón
-Private Enum ButtonKind
-    kindPrimary = 0         ' Naranja: acción principal
-    kindDark = 1            ' Tinta
-    kindSecondary = 2       ' Blanco
-End Enum
-
 
 '==============================================================================
 ' ARRANQUE Y CIERRE
@@ -101,18 +94,19 @@ Private Sub BuildLayout()
     ' --- Barra superior: clara si hay logo (JPG con fondo blanco), tinta si no ---
     mPrimary = PrimaryColor()
     mSecondary = SecondaryColor()
-    hasLogo = PlaceHeaderLogo()
+    BeginFormKit mFont, mPrimary, mSecondary
+    hasLogo = PlaceHeaderLogo(Me)
     If hasLogo Then
-        AddBand "c_Bar", 0, 0, FORM_WIDTH, 48, vbWhite, True
-        AddBand "c_BarLine", 0, 48, FORM_WIDTH, 2, mPrimary, False
-        AddLabel "c_Module", UI_MODULE, 142, 17, 120, 18, 11, True, TextGray()
+        AddBand Me, "c_Bar", 0, 0, FORM_WIDTH, 48, vbWhite, True
+        AddBand Me, "c_BarLine", 0, 48, FORM_WIDTH, 2, mPrimary, False
+        AddLabel Me, "c_Module", UI_MODULE, 142, 17, 120, 18, 11, True, TextGray()
     Else
-        AddBand "c_Bar", 0, 0, FORM_WIDTH, 48, mSecondary, True
-        AddLabel "c_Brand", UI_BRAND, MARGIN, 12, 80, 24, 16, True, ContrastTextColor(mSecondary)
-        AddLabel "c_Module", UI_MODULE, 104, 17, 120, 18, 11, False, BrandInkLight()
+        AddBand Me, "c_Bar", 0, 0, FORM_WIDTH, 48, mSecondary, True
+        AddLabel Me, "c_Brand", UI_BRAND, MARGIN, 12, 80, 24, 16, True, ContrastTextColor(mSecondary)
+        AddLabel Me, "c_Module", UI_MODULE, 104, 17, 120, 18, 11, False, BrandInkLight()
     End If
 
-    Set cboHistory = AddComboBox("c_History", rightEdge - 72 - 6 - 190, 13, 190, 22)
+    Set cboHistory = AddComboBox(Me, "c_History", rightEdge - 72 - 6 - 190, 13, 190, 22)
     With cboHistory
         .ColumnCount = 2                          ' Folio | Cliente
         .ColumnWidths = "70 pt;150 pt"
@@ -123,15 +117,15 @@ Private Sub BuildLayout()
         .MatchEntry = fmMatchEntryComplete
         .ControlTipText = TIP_HISTORY
     End With
-    Set btnLoad = AddButton("c_Load", UI_BTN_LOAD, kindSecondary, rightEdge - 72, 13, 72, 22)
+    Set btnLoad = AddButton(Me, "c_Load", UI_BTN_LOAD, kindSecondary, rightEdge - 72, 13, 72, 22)
 
     ' --- Sección 1: datos de la cotización ---
-    AddLabel "c_Sec1", UI_SECTION_QUOTE, MARGIN, 62, 300, 12, 8, True, mPrimary
-    AddLabel "c_LNumber", UI_LBL_NUMBER, MARGIN, 80, 90, 12, 8, False, TextGray()
-    AddLabel "c_LClient", UI_LBL_CLIENT, 116, 80, 250, 12, 8, False, TextGray()
-    AddLabel "c_LDate", UI_LBL_DATE, 524, 80, 118, 12, 8, False, TextGray()
+    AddLabel Me, "c_Sec1", UI_SECTION_QUOTE, MARGIN, 62, 300, 12, 8, True, mPrimary
+    AddLabel Me, "c_LNumber", UI_LBL_NUMBER, MARGIN, 80, 90, 12, 8, False, TextGray()
+    AddLabel Me, "c_LClient", UI_LBL_CLIENT, 116, 80, 250, 12, 8, False, TextGray()
+    AddLabel Me, "c_LDate", UI_LBL_DATE, 524, 80, 118, 12, 8, False, TextGray()
 
-    Set txtNumber = AddTextBox("c_Number", MARGIN, 94, 90, 22)
+    Set txtNumber = AddTextBox(Me, "c_Number", MARGIN, 94, 90, 22)
     With txtNumber
         .Locked = True                            ' El folio no se edita a mano
         .TabStop = False
@@ -139,7 +133,7 @@ Private Sub BuildLayout()
         .Font.Bold = True
     End With
 
-    Set cboClient = AddComboBox("c_Client", 116, 94, 400, 22)
+    Set cboClient = AddComboBox(Me, "c_Client", 116, 94, 400, 22)
     With cboClient
         .Style = fmStyleDropDownCombo             ' Se puede escribir un cliente nuevo
         .MatchEntry = fmMatchEntryComplete        ' Completa mientras escribes
@@ -149,41 +143,41 @@ Private Sub BuildLayout()
         .ControlTipText = TIP_CLIENT
     End With
 
-    Set txtDate = AddTextBox("c_Date", 524, 94, 118, 22)
+    Set txtDate = AddTextBox(Me, "c_Date", 524, 94, 118, 22)
     txtDate.MaxLength = 10
-    Set lblValidUntil = AddLabel("c_ValidUntil", "", 524, 118, 118, 12, 8, False, TextGray())
+    Set lblValidUntil = AddLabel(Me, "c_ValidUntil", "", 524, 118, 118, 12, 8, False, TextGray())
 
     ' --- Sección 2: captura de conceptos ---
-    AddLabel "c_Sec2", UI_SECTION_ITEM, MARGIN, 132, 300, 12, 8, True, mPrimary
-    AddLabel "c_LQty", UI_LBL_QTY, MARGIN, 150, 64, 12, 8, False, TextGray()
-    AddLabel "c_LDesc", UI_LBL_DESCRIPTION, 90, 150, 200, 12, 8, False, TextGray()
-    AddLabel "c_LPrice", UI_LBL_PRICE, 388, 150, 90, 12, 8, False, TextGray()
-    AddLabel "c_LAmount", UI_LBL_AMOUNT, 486, 150, 76, 12, 8, False, TextGray()
+    AddLabel Me, "c_Sec2", UI_SECTION_ITEM, MARGIN, 132, 300, 12, 8, True, mPrimary
+    AddLabel Me, "c_LQty", UI_LBL_QTY, MARGIN, 150, 64, 12, 8, False, TextGray()
+    AddLabel Me, "c_LDesc", UI_LBL_DESCRIPTION, 90, 150, 200, 12, 8, False, TextGray()
+    AddLabel Me, "c_LPrice", UI_LBL_PRICE, 388, 150, 90, 12, 8, False, TextGray()
+    AddLabel Me, "c_LAmount", UI_LBL_AMOUNT, 486, 150, 76, 12, 8, False, TextGray()
 
-    Set txtQty = AddTextBox("c_Qty", MARGIN, 164, 64, 22)
+    Set txtQty = AddTextBox(Me, "c_Qty", MARGIN, 164, 64, 22)
     txtQty.TextAlign = fmTextAlignRight
     txtQty.MaxLength = 12
-    Set txtDescription = AddTextBox("c_Desc", 90, 164, 290, 22)
+    Set txtDescription = AddTextBox(Me, "c_Desc", 90, 164, 290, 22)
     txtDescription.MaxLength = 255
-    Set txtPrice = AddTextBox("c_Price", 388, 164, 90, 22)
+    Set txtPrice = AddTextBox(Me, "c_Price", 388, 164, 90, 22)
     txtPrice.TextAlign = fmTextAlignRight
     txtPrice.MaxLength = 15
 
-    Set lblAmount = AddLabel("c_Amount", "", 486, 164, 76, 22, 10, True, mSecondary, fmTextAlignRight)
+    Set lblAmount = AddLabel(Me, "c_Amount", "", 486, 164, 76, 22, 10, True, mSecondary, fmTextAlignRight)
     With lblAmount
         .BackStyle = fmBackStyleOpaque
         .BackColor = Neutral50()
         .BorderStyle = fmBorderStyleSingle
         .BorderColor = Neutral200()
     End With
-    Set btnAdd = AddButton("c_Add", UI_BTN_ADD, kindDark, 570, 164, 72, 22)
+    Set btnAdd = AddButton(Me, "c_Add", UI_BTN_ADD, kindDark, 570, 164, 72, 22)
 
     ' --- Lista de conceptos con encabezado de columnas ---
-    AddBand "c_ListHead", MARGIN, 198, FORM_WIDTH - 2 * MARGIN, 20, Neutral100(), False
-    AddLabel "c_C1", UI_COL_QTY, 22, 202, 50, 12, 8, True, mSecondary
-    AddLabel "c_C2", UI_COL_DESCRIPTION, 78, 202, 200, 12, 8, True, mSecondary
-    AddLabel "c_C3", UI_COL_PRICE, 408, 202, 100, 12, 8, True, mSecondary
-    AddLabel "c_C4", UI_COL_AMOUNT, 518, 202, 100, 12, 8, True, mSecondary
+    AddBand Me, "c_ListHead", MARGIN, 198, FORM_WIDTH - 2 * MARGIN, 20, Neutral100(), False
+    AddLabel Me, "c_C1", UI_COL_QTY, 22, 202, 50, 12, 8, True, mSecondary
+    AddLabel Me, "c_C2", UI_COL_DESCRIPTION, 78, 202, 200, 12, 8, True, mSecondary
+    AddLabel Me, "c_C3", UI_COL_PRICE, 408, 202, 100, 12, 8, True, mSecondary
+    AddLabel Me, "c_C4", UI_COL_AMOUNT, 518, 202, 100, 12, 8, True, mSecondary
 
     Set lstItems = Me.Controls.Add("Forms.ListBox.1", "c_Items", True)
     Place lstItems, MARGIN, 218, FORM_WIDTH - 2 * MARGIN, 146
@@ -191,20 +185,20 @@ Private Sub BuildLayout()
     lstItems.ColumnCount = 4
     lstItems.ColumnWidths = "56 pt;330 pt;110 pt;110 pt"
 
-    Set btnEdit = AddButton("c_Edit", UI_BTN_EDIT, kindSecondary, MARGIN, 372, 84, 24)
-    Set btnDelete = AddButton("c_Delete", UI_BTN_DELETE, kindSecondary, MARGIN + 90, 372, 84, 24)
+    Set btnEdit = AddButton(Me, "c_Edit", UI_BTN_EDIT, kindSecondary, MARGIN, 372, 84, 24)
+    Set btnDelete = AddButton(Me, "c_Delete", UI_BTN_DELETE, kindSecondary, MARGIN + 90, 372, 84, 24)
 
     ' --- Créditos de innobytes (clic = abrir el sitio) ---
-    Set lblInnobytes = AddLabel("c_Innobytes", InnobytesCredit(), MARGIN, 418, 380, 12, 8, False, TextGray())
+    Set lblInnobytes = AddLabel(Me, "c_Innobytes", InnobytesCredit(), MARGIN, 418, 380, 12, 8, False, TextGray())
     lblInnobytes.ControlTipText = Fmt(TIP_INNOBYTES, INNOBYTES_WEB)
     lblInnobytes.MousePointer = fmMousePointerUpArrow
 
     ' --- Totales ---
-    AddLabel "c_LSub", UI_LBL_SUBTOTAL, 436, 374, 100, 14, 9, False, TextGray(), fmTextAlignRight
-    Set lblSubtotal = AddLabel("c_Subtotal", "", 540, 373, 102, 16, 10, False, mSecondary, fmTextAlignRight)
+    AddLabel Me, "c_LSub", UI_LBL_SUBTOTAL, 436, 374, 100, 14, 9, False, TextGray(), fmTextAlignRight
+    Set lblSubtotal = AddLabel(Me, "c_Subtotal", "", 540, 373, 102, 16, 10, False, mSecondary, fmTextAlignRight)
 
-    AddLabel "c_LTax", UI_LBL_TAX, 400, 392, 56, 14, 9, False, TextGray(), fmTextAlignRight
-    Set cboTax = AddComboBox("c_TaxRate", 462, 389, 70, 19)
+    AddLabel Me, "c_LTax", UI_LBL_TAX, 400, 392, 56, 14, 9, False, TextGray(), fmTextAlignRight
+    Set cboTax = AddComboBox(Me, "c_TaxRate", 462, 389, 70, 19)
     With cboTax
         .Style = fmStyleDropDownList              ' Solo se puede elegir, no escribir
         .AddItem UI_TAX_16                        ' taxStandard
@@ -213,23 +207,23 @@ Private Sub BuildLayout()
         .Font.Size = 9
         .ControlTipText = TIP_TAX
     End With
-    Set lblTax = AddLabel("c_Tax", "", 540, 391, 102, 16, 10, False, mSecondary, fmTextAlignRight)
+    Set lblTax = AddLabel(Me, "c_Tax", "", 540, 391, 102, 16, 10, False, mSecondary, fmTextAlignRight)
 
-    AddBand "c_TotalLine", 436, 412, 206, 1, Neutral200(), False
-    AddLabel "c_LTotal", UI_LBL_TOTAL, 436, 422, 100, 16, 11, True, mSecondary, fmTextAlignRight
-    Set lblTotal = AddLabel("c_Total", "", 520, 418, 122, 22, 15, True, mPrimary, fmTextAlignRight)
+    AddBand Me, "c_TotalLine", 436, 412, 206, 1, Neutral200(), False
+    AddLabel Me, "c_LTotal", UI_LBL_TOTAL, 436, 422, 100, 16, 11, True, mSecondary, fmTextAlignRight
+    Set lblTotal = AddLabel(Me, "c_Total", "", 520, 418, 122, 22, 15, True, mPrimary, fmTextAlignRight)
 
     ' --- Barra inferior de acciones ---
-    AddBand "c_Footer", 0, 450, FORM_WIDTH, FORM_HEIGHT - 450, Neutral50(), True
-    AddBand "c_FooterLine", 0, 450, FORM_WIDTH, 1, Neutral200(), False
-    Set btnNew = AddButton("c_New", UI_BTN_NEW, kindSecondary, MARGIN, 460, 120, 26)
-    Set btnLogo = AddButton("c_Logo", UI_BTN_LOGO, kindSecondary, MARGIN + 126, 460, 84, 26)
+    AddBand Me, "c_Footer", 0, 450, FORM_WIDTH, FORM_HEIGHT - 450, Neutral50(), True
+    AddBand Me, "c_FooterLine", 0, 450, FORM_WIDTH, 1, Neutral200(), False
+    Set btnNew = AddButton(Me, "c_New", UI_BTN_NEW, kindSecondary, MARGIN, 460, 120, 26)
+    Set btnLogo = AddButton(Me, "c_Logo", UI_BTN_LOGO, kindSecondary, MARGIN + 126, 460, 84, 26)
     btnLogo.ControlTipText = TIP_LOGO
-    Set btnCompany = AddButton("c_Company", UI_BTN_COMPANY, kindSecondary, MARGIN + 216, 460, 90, 26)
+    Set btnCompany = AddButton(Me, "c_Company", UI_BTN_COMPANY, kindSecondary, MARGIN + 216, 460, 90, 26)
     btnCompany.ControlTipText = TIP_COMPANY
-    Set btnPreview = AddButton("c_Preview", UI_BTN_PREVIEW, kindSecondary, 330, 460, 100, 26)
-    Set btnSave = AddButton("c_Save", UI_BTN_SAVE, kindPrimary, 436, 460, 100, 26)
-    Set btnPdf = AddButton("c_Pdf", UI_BTN_PDF, kindDark, 542, 460, 100, 26)
+    Set btnPreview = AddButton(Me, "c_Preview", UI_BTN_PREVIEW, kindSecondary, 330, 460, 100, 26)
+    Set btnSave = AddButton(Me, "c_Save", UI_BTN_SAVE, kindPrimary, 436, 460, 100, 26)
+    Set btnPdf = AddButton(Me, "c_Pdf", UI_BTN_PDF, kindDark, 542, 460, 100, 26)
 
     ' --- Orden del tabulador ---
     cboClient.TabIndex = 0
@@ -249,140 +243,6 @@ Private Sub BuildLayout()
     cboHistory.TabIndex = 14
     btnLoad.TabIndex = 15
 End Sub
-
-' Busca un control Image en el formulario (lo agrega el build) y lo acomoda.
-' Regresa True si hay logo.
-Private Function PlaceHeaderLogo() As Boolean
-    Dim ctl As Object, img As Object, filePath As String
-
-    For Each ctl In Me.Controls
-        If TypeName(ctl) = "Image" Then
-            Set img = ctl
-            Exit For
-        End If
-    Next ctl
-
-    ' Respaldo: archivo JPG junto al libro
-    If img Is Nothing Then
-        If Len(ThisWorkbook.Path) = 0 Then Exit Function
-        filePath = ThisWorkbook.Path & Application.PathSeparator & FORM_LOGO_FILE
-        If Len(Dir$(filePath)) = 0 Then Exit Function
-        On Error GoTo NoLogo
-        Set img = Me.Controls.Add("Forms.Image.1", "c_Logo", True)
-        img.Picture = LoadPicture(filePath)
-        On Error GoTo 0
-    End If
-
-    img.AutoSize = False                          ' Si no, vuelve al tamaño de la imagen
-    Place img, MARGIN, 7, 112, 34
-    img.PictureSizeMode = fmPictureSizeModeZoom   ' Encoge sin deformar
-    img.PictureAlignment = fmPictureAlignmentTopLeft
-    img.BorderStyle = fmBorderStyleNone
-    img.BackStyle = fmBackStyleTransparent
-    img.ZOrder fmZOrderFront
-    PlaceHeaderLogo = True
-    Exit Function
-NoLogo:
-    PlaceHeaderLogo = False
-End Function
-
-'--- Fábricas de controles -----------------------------------------------------
-
-Private Sub Place(ByVal ctl As Object, ByVal x As Single, ByVal y As Single, _
-                  ByVal w As Single, ByVal h As Single)
-    ctl.Left = x
-    ctl.Top = y
-    ctl.Width = w
-    ctl.Height = h
-End Sub
-
-' Estilo plano para cajas de texto, listas y combos: borde gris fino.
-Private Sub StyleInput(ByVal ctl As Object)
-    ctl.SpecialEffect = fmSpecialEffectFlat       ' Primero quitar el relieve 3D...
-    ctl.BorderStyle = fmBorderStyleSingle         ' ...luego el borde sencillo
-    ctl.BorderColor = Neutral300()
-    ctl.BackColor = vbWhite
-    ctl.ForeColor = mSecondary
-    ctl.Font.Name = mFont
-    ctl.Font.Size = 10
-End Sub
-
-Private Function AddTextBox(ByVal ctlName As String, ByVal x As Single, ByVal y As Single, _
-                            ByVal w As Single, ByVal h As Single) As MSForms.TextBox
-    Dim ctl As MSForms.TextBox
-    Set ctl = Me.Controls.Add("Forms.TextBox.1", ctlName, True)
-    Place ctl, x, y, w, h
-    StyleInput ctl
-    Set AddTextBox = ctl
-End Function
-
-Private Function AddComboBox(ByVal ctlName As String, ByVal x As Single, ByVal y As Single, _
-                             ByVal w As Single, ByVal h As Single) As MSForms.ComboBox
-    Dim ctl As MSForms.ComboBox
-    Set ctl = Me.Controls.Add("Forms.ComboBox.1", ctlName, True)
-    Place ctl, x, y, w, h
-    StyleInput ctl
-    Set AddComboBox = ctl
-End Function
-
-Private Function AddButton(ByVal ctlName As String, ByVal buttonText As String, ByVal kind As ButtonKind, _
-                           ByVal x As Single, ByVal y As Single, _
-                           ByVal w As Single, ByVal h As Single) As MSForms.CommandButton
-    Dim ctl As MSForms.CommandButton
-    Set ctl = Me.Controls.Add("Forms.CommandButton.1", ctlName, True)
-    Place ctl, x, y, w, h
-    ctl.Caption = buttonText
-    ctl.Font.Name = mFont
-    ctl.Font.Size = 9
-    ctl.Font.Bold = True
-    Select Case kind
-        Case kindPrimary
-            ctl.BackColor = mPrimary
-            ctl.ForeColor = ContrastTextColor(mPrimary)
-        Case kindDark
-            ctl.BackColor = mSecondary
-            ctl.ForeColor = ContrastTextColor(mSecondary)
-        Case Else
-            ctl.BackColor = vbWhite
-            ctl.ForeColor = mSecondary
-    End Select
-    Set AddButton = ctl
-End Function
-
-' Etiqueta de texto.
-Private Function AddLabel(ByVal ctlName As String, ByVal labelText As String, _
-                          ByVal x As Single, ByVal y As Single, ByVal w As Single, ByVal h As Single, _
-                          ByVal fontSize As Single, ByVal isBold As Boolean, ByVal textColor As Long, _
-                          Optional ByVal align As fmTextAlign = fmTextAlignLeft) As MSForms.Label
-    Dim ctl As MSForms.Label
-    Set ctl = Me.Controls.Add("Forms.Label.1", ctlName, True)
-    Place ctl, x, y, w, h
-    With ctl
-        .Caption = labelText
-        .BackStyle = fmBackStyleTransparent
-        .WordWrap = False
-        .TextAlign = align
-        .Font.Name = mFont
-        .Font.Size = fontSize
-        .Font.Bold = isBold
-        .ForeColor = textColor
-    End With
-    Set AddLabel = ctl
-End Function
-
-' Rectángulo de color (bandas y líneas).
-'   toBack: True lo manda detrás de los demás controles.
-Private Sub AddBand(ByVal ctlName As String, ByVal x As Single, ByVal y As Single, _
-                    ByVal w As Single, ByVal h As Single, ByVal fillColor As Long, ByVal toBack As Boolean)
-    Dim ctl As MSForms.Label
-    Set ctl = Me.Controls.Add("Forms.Label.1", ctlName, True)
-    Place ctl, x, y, w, h
-    ctl.Caption = ""
-    ctl.BackStyle = fmBackStyleOpaque
-    ctl.BackColor = fillColor
-    If toBack Then ctl.ZOrder fmZOrderBack
-End Sub
-
 
 '==============================================================================
 ' ESTADO DEL FORMULARIO
@@ -414,22 +274,6 @@ Private Sub StartNewQuote()
     FocusOn cboClient
 End Sub
 
-Private Sub FocusOn(ByVal ctl As Object)
-    On Error Resume Next                          ' Falla si el formulario aún no es visible
-    ctl.SetFocus
-    On Error GoTo 0
-End Sub
-
-' Muestra un aviso y lleva el cursor al control con problema.
-Private Sub Warn(ByVal message As String, ByVal ctl As Object)
-    MsgBox message, vbExclamation, TTL_REVIEW
-    FocusOn ctl
-    On Error Resume Next
-    ctl.SelStart = 0
-    ctl.SelLength = Len(ctl.Text)
-    On Error GoTo 0
-End Sub
-
 ' Cambio hecho por el usuario (no por el código).
 Private Sub MarkDirty()
     If Not mSuppressEvents Then mIsDirty = True
@@ -445,7 +289,7 @@ Private Sub txtDate_Change()
 End Sub
 
 Private Sub UpdateValidUntil()
-    If IsDate(txtDate.Text) Then
+    If IsValidDate(txtDate.Text) Then
         lblValidUntil.Caption = Fmt(UI_VALID_UNTIL, Format$(CDate(txtDate.Text) + ValidityDays(), "dd/mm/yyyy"))
     Else
         lblValidUntil.Caption = ""
@@ -689,7 +533,7 @@ Private Function SyncQuoteFromForm() As Boolean
     If Len(clientText) = 0 Then
         Warn MSG_CLIENT_EMPTY, cboClient: Exit Function
     End If
-    If Not IsDate(txtDate.Text) Then
+    If Not IsValidDate(txtDate.Text) Then
         Warn MSG_DATE_INVALID, txtDate: Exit Function
     End If
     If mQuote.ItemCount = 0 Then
