@@ -23,7 +23,7 @@ src/
     modHome        Hoja "Inicio": portada, botón y logos de Cotiva e innobytes
     modSecurity    Protección del libro y macros de administrador
     modSecrets.example.bas   Plantilla de la clave (modSecrets.bas NO se sube)
-  classes/     Quote, QuoteItem
+  classes/     Quote, QuoteItem, ServiceOrder
   forms/       frmQuote.vba (solo código; la interfaz se construye por código)
   build/       modBuild.bas (arma el libro; se elimina del .xlsm final)
 build/
@@ -106,6 +106,8 @@ Git, pero dentro del `.xlsm` solo la protege la contraseña del proyecto VBA.
 
 ## Migrar datos de una versión anterior
 
-Las hojas de datos conservan los mismos nombres y columnas. En el archivo viejo y en el nuevo ejecuta
+Las hojas de datos conservan los mismos nombres y columnas, con estas adiciones: `BD_Cotizaciones` agrega
+la columna I (`OrdenFolio`), `BD_Clientes` agrega C:F (contacto) y existe la hoja nueva `BD_Ordenes`
+(26 columnas, ver `ServiceOrder.cls`). Al abrir un libro anterior se crean solas. En el archivo viejo y en el nuevo ejecuta
 `AdminUnlock`, copia las filas de `BD_Cotizaciones`, `BD_Detalle` y `BD_Clientes` (sin encabezados)
 y ejecuta `AdminLock` en el nuevo.

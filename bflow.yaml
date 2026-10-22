@@ -5,3 +5,10 @@ vcs:
   host: github
   base_branch: auto-repair-shop
 agent: [claude]
+check:
+  steps:
+    # Revision estatica sin Excel: Option Explicit, codificacion Windows-1252 y,
+    # en lo que agrega la rama, sin Debug.Print/Stop/Select/Activate. Compilar y
+    # probar en Excel sigue siendo manual (build.ps1).
+    - name: lint
+      run: powershell -NoProfile -ExecutionPolicy Bypass -File build/lint.ps1 -Base {base}

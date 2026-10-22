@@ -47,6 +47,7 @@ Public Sub EnsureWorkbookStructure()
     End If
     If Not SheetExists(SHEET_QUOTES) Then AddSheet SHEET_QUOTES
     If Not SheetExists(SHEET_ITEMS) Then AddSheet SHEET_ITEMS
+    If Not SheetExists(SHEET_ORDERS) Then AddSheet SHEET_ORDERS
 
     If Not SheetExists(SHEET_CLIENTS) Then
         AddSheet SHEET_CLIENTS
