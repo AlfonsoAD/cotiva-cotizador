@@ -44,7 +44,7 @@
 1. El paso `test` va en `check.steps` de `bflow.yaml`, después de `lint`, y corre en todos los carriles (full, light, hotfix). Si la máquina no tiene Excel, `test.ps1` falla con un mensaje claro; no se salta en silencio.
 2. Limpieza de `BD_*`: el runner de `src/tests/` limpia las hojas directamente. Queda exento de la regla "solo modData toca BD_*" porque nunca viaja al libro entregado. No se agrega a `modData` código solo para pruebas. Las pruebas en sí ejercitan `modData` para leer y escribir.
 3. La lógica de armado (importar módulos, clases y formulario; `AccessVBOM` con restauración en `finally`; cierre de Excel) se mueve a un script común `build/lib.ps1`, que usan `build.ps1` y `test.ps1`. `build.ps1` debe seguir produciendo exactamente lo mismo.
-4. `build/test.ps1`: arma un libro temporal con Excel oculto, importa `src/tests/` y, si falta `src/modules/modSecrets.bas`, usa uno temporal a partir de `modSecrets.example.bas` sin dejarlo en `src/`. Corre `Application.Run "RunAllTests"`, escribe `dist/test-results.txt` (`ok N / falla M` y el detalle de cada falla), también lo muestra en consola y sale con 1 si algo falla.
+4. `build/test.ps1`: arma un libro temporal con Excel oculto, importa `src/tests/` y, si falta `src/modules/modSecrets.bas`, usa uno temporal a partir de `modSecrets.example.bas` sin dejarlo en `src/`. Llama por COM a cada prueba (`ListTests`, `BeginTest`, `EndTest`, `Report`), escribe `dist/test-results.txt` (`ok N / falla M` y el detalle de cada falla), también lo muestra en consola y sale con 1 si algo falla.
 5. Límite de 5 minutos: si se pasa (por ejemplo, porque un error de compilación abrió un diálogo modal), mata el proceso de Excel que lanzó y lo reporta como "tiempo agotado / posible error de compilación". Siempre cierra Excel y restaura `AccessVBOM`.
 6. Modo prueba en `modUtils`: una bandera hace que `ShowError` guarde el último error (dónde, número, descripción) en una variable que las pruebas y `AssertFails` pueden leer, sin abrir `MsgBox`. Fuera de modo prueba, el comportamiento no cambia.
 
@@ -55,12 +55,12 @@
 
 ## Requirements
 
-- **R1** [D] CUANDO `RunAllTests` corre, el sistema DEBE ejecutar, en orden de módulo y de línea, cada `Public Sub Test_*()` sin parámetros de los módulos estándar cuyo nombre empiece con `modTest`, leyéndolos del `VBProject`.
+- **R1** [D] CUANDO corre el runner (`RunAllTests` desde VBA, o `ListTests` y `BeginTest`/`EndTest` por prueba desde `test.ps1`), el sistema DEBE ejecutar, en orden de módulo y de línea, cada `Public Sub Test_*()` sin parámetros de los módulos estándar cuyo nombre empiece con `modTest`, leyéndolos del `VBProject`.
 - **R2** [D] CUANDO un `AssertEqual`, `AssertTrue` o `AssertFails` no se cumple, el sistema DEBE anotar la falla con `<módulo>.<prueba>`, la etiqueta y lo esperado contra lo obtenido, y seguir con la prueba.
 - **R3** [N] CUANDO una prueba lanza un error que nadie maneja, el sistema DEBE contarla como falla con el número y la descripción del error, y seguir con la siguiente prueba.
 - **R4** [D] ANTES de cada prueba, el sistema DEBE dejar las hojas `BD_*` solo con encabezados, recrear la estructura que falte (`EnsureWorkbookStructure`) y volver a proteger el libro (`ProtectAll`), como un libro recién abierto.
 - **R5** [D] CUANDO corre `build.ps1`, el sistema NO DEBE importar nada de `src/tests/`. El `.xlsm` entregado no contiene `modTest*`, `modAssert` ni `modTestRunner`.
-- **R6** [D] CUANDO corre `test.ps1`, el sistema DEBE armar con Excel oculto un libro con el mismo código que `build.ps1` (y `BuildWorkbook`) más `src/tests/*.bas`, y correr `RunAllTests` en él.
+- **R6** [D] CUANDO corre `test.ps1`, el sistema DEBE armar con Excel oculto un libro con el mismo código que `build.ps1` (y `BuildWorkbook`) más `src/tests/*.bas`, y correr cada prueba en él por COM (`ListTests`, `BeginTest`, `EndTest`, `Report`).
 - **R7** [D] CUANDO falta `src/modules/modSecrets.bas`, `test.ps1` DEBE usar `modSecrets.example.bas` sin crear ni dejar archivos en `src/`.
 - **R8** [D] CUANDO terminan las pruebas, `test.ps1` DEBE escribir `dist/test-results.txt` y mostrar en consola la línea `ok N / falla M` seguida de una línea por falla. DEBE salir con 0 si M = 0 y N > 0, y con 1 en cualquier otro caso.
 - **R9** [N] CUANDO `RunAllTests` no encuentra ninguna prueba, `test.ps1` DEBE salir con 1 y decir "no se encontraron pruebas".
@@ -133,7 +133,7 @@ Private Sub ResetDataSheets()
 ```
 
 - `FindTests` recorre `ThisWorkbook.VBProject.VBComponents` con enlace tardío, sin referencia a VBIDE (`Type = 1` es módulo estándar). Toma los módulos con `Name Like "modTest*"` y, en su `CodeModule`, las líneas que cumplen `Trim$(line) Like "Public Sub Test_*()*"`. El nombre es lo que va entre `Sub ` y `(`.
-- Por cada prueba: `ResetDataSheets`, `SetTestMode True`, `ClearLastError`, falla actual = vacía. Después, `On Error GoTo` hacia un manejador local, `Application.Run "'" & ThisWorkbook.Name & "'!" & nombre` y `On Error GoTo 0`. Con error, anota `error <n>: <descripción>` (R3). La prueba pasa si no anotó nada. Al final restablece `Application.ScreenUpdating = True` y `EnableEvents`.
+- Por cada prueba: `SetTestMode True`, `ResetDataSheets`, `ClearLastError`, falla actual = vacía. Después, `On Error GoTo` hacia un manejador local, `Application.Run "'" & ThisWorkbook.Name & "'!" & nombre` y `On Error GoTo 0`. Con error, anota `error <n>: <descripción>` (R3). La prueba pasa si no anotó nada. Al final restablece `Application.ScreenUpdating = True` y `EnableEvents`.
 - `ResetDataSheets`: `TryUnprotectWorkbook`. Para cada hoja de `SHEET_QUOTES`, `SHEET_ITEMS`, `SHEET_CLIENTS` y `SHEET_ORDERS` que exista: `UnlockSheet` y borra las filas 2 en adelante (`ws.Rows("2:" & ws.Rows.Count).Delete`). Después `EnsureWorkbookStructure` (recrea lo que una prueba como P8 haya quitado) y `ProtectAll`. Esta escritura directa en `BD_*` es la excepción del discovery (D2): `src/tests/` nunca viaja al libro entregado.
 - Sin pruebas: devuelve `ok 0 / falla 0` y la línea `no se encontraron pruebas` (R9).
 
@@ -215,7 +215,7 @@ param(
 5. Si no, el código de salida es el del hijo. Si `Results` no existe, escribe "el proceso de pruebas terminó sin resultados" y sale con 1.
 6. En el `finally`: `Restore-VbaAccess` y borrar `PidFile` (R11).
 
-**Hijo** (`-Worker`): `New-ExcelApp` (oculto salvo `-Visible`), escribe `Get-ExcelProcessId` en `PidFile` y crea el libro con `Workbooks.Add()`, sin `SaveAs` ([N1]). Sigue con `Import-CotizadorCode -IncludeTests -SecretsFile <modSecrets.bas o modSecrets.example.bas>` (R7, [N3]), `Run("'<libro>'!modBuild.BuildWorkbook", assets)` y `$report = Run("'<libro>'!modTestRunner.RunAllTests")`. Escribe `$report` en `Results` (UTF-8) y en consola: verde si todo pasó, rojo si no. Sale con 0 solo si la primera línea es `ok N / falla 0` con N > 0 (R8, R9). Una excepción de COM o de PowerShell se escribe como `error: <mensaje>` y sale con 1. Su `finally` hace `Close-ExcelApp`. No toca `AccessVBOM`: de eso se encarga el padre.
+**Hijo** (`-Worker`): `New-ExcelApp` (oculto salvo `-Visible`), escribe `Get-ExcelProcessId` en `PidFile` y crea el libro con `Workbooks.Add()`, sin `SaveAs` ([N1]). Sigue con `Import-CotizadorCode -IncludeTests -SecretsFile <modSecrets.bas o modSecrets.example.bas>` (R7, [N3]), `Run("'<libro>'!modBuild.BuildWorkbook", assets)` y `Run("…ListTests")`; por cada prueba, `BeginTest`, `Run` de la prueba con `try/catch` y `EndTest`; al final `$report = Run("…Report", ok, falla, fallas)`. Escribe `$report` en `Results` (UTF-8) y en consola: verde si todo pasó, rojo si no. Sale con 0 solo si la primera línea es `ok N / falla 0` con N > 0 (R8, R9). Una excepción de COM o de PowerShell se escribe como `error: <mensaje>` y sale con 1. Su `finally` hace `Close-ExcelApp`. No toca `AccessVBOM`: de eso se encarga el padre.
 
 ### `bflow.yaml` (R15)
 

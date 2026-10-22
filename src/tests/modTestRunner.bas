@@ -50,14 +50,14 @@ Public Function ListTests() As String
     Next testName
 End Function
 
-' Deja el libro como recien abierto y activa el modo prueba. Si eso falla, la prueba ya cuenta como falla.
+' Activa el modo prueba y despues deja el libro como recien abierto. Si eso falla, la prueba ya cuenta como falla.
 Public Sub BeginTest(ByVal testName As String)
     mCurrentName = testName
     Set mFailureLines = New Collection
 
     On Error GoTo Fail
-    ResetDataSheets
     SetTestMode True
+    ResetDataSheets
     ClearLastError
     Exit Sub
 Fail:
@@ -87,13 +87,15 @@ Public Sub RecordFailure(ByVal message As String)
     mFailureLines.Add "FALLA " & mCurrentName & ": " & message
 End Sub
 
-' Primera linea "ok N / falla M", luego una linea "FALLA <modulo>.<prueba>: <detalle>" por falla.
+' Primera linea "ok N / falla M", luego una linea "FALLA <modulo>.<prueba>: <detalle>" por falla
+' (test.ps1 antepone "--- FAIL: <modulo>.<prueba>" a las fallas de cada prueba).
 ' Sin ninguna prueba agrega la linea "no se encontraron pruebas".
 Public Function Report(ByVal passed As Long, ByVal failed As Long, ByVal failureText As String) As String
     Report = "ok " & passed & " / falla " & failed
     If passed + failed = 0 Then Report = Report & vbLf & "no se encontraron pruebas"
     If Len(failureText) > 0 Then Report = Report & vbLf & failureText
 End Function
+
 ' "<modulo>.<prueba>" de cada Public Sub Test_*() sin parametros, en orden de modulo y de linea.
 ' Enlace tardio: no hace falta la referencia a la biblioteca de extensibilidad de VBA.
 Private Function FindTests() As Collection

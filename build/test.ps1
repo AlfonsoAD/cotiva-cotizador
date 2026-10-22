@@ -4,8 +4,8 @@
 
 .DESCRIPTION
   Arma en memoria un libro con el mismo codigo que build.ps1 mas src\tests\*.bas,
-  corre modTestRunner.RunAllTests y escribe dist\test-results.txt. El libro nunca
-  se guarda en disco.
+  llama por COM a cada prueba (modTestRunner.ListTests, BeginTest, EndTest y Report) y escribe dist\test-results.txt.
+  El libro nunca se guarda en disco.
 
   Sale con 0 solo si hubo al menos una prueba y ninguna fallo; con 1 si falla una
   prueba, no hay pruebas, no hay Excel o se pasa el limite de tiempo.
@@ -81,6 +81,7 @@ if ($Worker) {
                 $failure = "FALLA ${name}: error {0:X8}: {1}" -f [int]$com.HResult, $com.Message
             }
             $recorded = [string]$excel.Run($book + "modTestRunner.EndTest")
+            if ($recorded -or $failure) { $failureLines.Add("--- FAIL: $name") }
             if ($recorded) { $failureLines.Add($recorded) }
             if ($failure) { $failureLines.Add($failure) }
             if ($recorded -or $failure) { $failed++ } else { $passed++ }
@@ -128,8 +129,8 @@ try {
     if (Test-Path $Results) { Remove-Item $Results -Force }
     Set-Content -Path $pidFilePath -Value '' -Encoding ASCII
 
-    $childArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $PSCommandPath,
-              '-Worker', '-PidFile', $pidFilePath, '-Results', $Results)
+    $childArgs = @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', ('"' + $PSCommandPath + '"'),
+              '-Worker', '-PidFile', ('"' + $pidFilePath + '"'), '-Results', ('"' + $Results + '"'))
     if ($Visible) { $childArgs += '-Visible' }
     $child = Start-Process -FilePath 'powershell' -ArgumentList $childArgs -NoNewWindow -PassThru
     [void]$child.Handle                       # Necesario para que ExitCode quede disponible
