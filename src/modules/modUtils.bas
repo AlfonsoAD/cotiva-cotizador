@@ -310,3 +310,25 @@ Private Function TensToWords(ByVal n As Long, ByVal shorten As Boolean) As Strin
     End If
     TensToWords = result
 End Function
+
+'--- Validacion de campos ------------------------------------------------------
+
+Public Function IsValidDate(ByVal dateText As String) As Boolean
+    Err.Raise vbObjectError + 513, "IsValidDate", "No implementado"
+End Function
+
+Public Function IsValidTime(ByVal timeText As String) As Boolean
+    Err.Raise vbObjectError + 513, "IsValidTime", "No implementado"
+End Function
+
+Public Function IsValidVehicleYear(ByVal yearText As String, Optional ByVal referenceDate As Date = 0) As Boolean
+    Err.Raise vbObjectError + 513, "IsValidVehicleYear", "No implementado"
+End Function
+
+Public Function IsValidMileage(ByVal mileageText As String) As Boolean
+    Err.Raise vbObjectError + 513, "IsValidMileage", "No implementado"
+End Function
+
+Public Function IsValidVin(ByVal vinText As String) As Boolean
+    Err.Raise vbObjectError + 513, "IsValidVin", "No implementado"
+End Function

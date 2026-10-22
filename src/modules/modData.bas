@@ -620,3 +620,8 @@ Public Function ListOrders() As Variant
     Next i
     ListOrders = result
 End Function
+
+' Nombres distintos de Recibio/Entrego en BD_Ordenes, orden alfabetico; Empty si no hay.
+Public Function ListOrderStaff() As Variant
+    Err.Raise vbObjectError + 513, "ListOrderStaff", "No implementado"
+End Function

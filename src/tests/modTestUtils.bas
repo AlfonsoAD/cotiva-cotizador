@@ -98,3 +98,63 @@ Handler:
     AssertEqual 5, LastErrorNumber(), "numero"
     AssertTrue Len(LastErrorDescription()) > 0, "descripcion"
 End Sub
+
+Public Sub Test_IsValidDate_AceptaFechas()
+    AssertTrue IsValidDate("15/03/2026"), "dd/mm/yyyy"
+    AssertTrue IsValidDate(" 2026-03-15 "), "iso con espacios"
+    AssertTrue IsValidDate("29/02/2024"), "bisiesto"
+End Sub
+
+Public Sub Test_IsValidDate_RechazaTextoYVacio()
+    AssertTrue Not IsValidDate(""), "vacio"
+    AssertTrue Not IsValidDate("   "), "solo espacios"
+    AssertTrue Not IsValidDate("hola"), "texto"
+    AssertTrue Not IsValidDate("31/02/2026"), "dia inexistente"
+End Sub
+
+Public Sub Test_IsValidTime_AceptaHoras()
+    AssertTrue IsValidTime("9:05"), "H:MM"
+    AssertTrue IsValidTime("09:05"), "HH:MM"
+    AssertTrue IsValidTime("00:00"), "medianoche"
+    AssertTrue IsValidTime("23:59"), "ultimo minuto"
+End Sub
+
+Public Sub Test_IsValidTime_RechazaFueraDeFormato()
+    AssertTrue Not IsValidTime("24:00"), "24:00"
+    AssertTrue Not IsValidTime("12:60"), "12:60"
+    AssertTrue Not IsValidTime("1205"), "sin dos puntos"
+    AssertTrue Not IsValidTime("12:5"), "un digito de minutos"
+    AssertTrue Not IsValidTime("ab:cd"), "letras"
+    AssertTrue Not IsValidTime(""), "vacio"
+End Sub
+
+Public Sub Test_IsValidVehicleYear_Limites()
+    Dim ref As Date
+    ref = DateSerial(2026, 6, 15)
+    AssertTrue IsValidVehicleYear("1950", ref), "minimo"
+    AssertTrue IsValidVehicleYear("2027", ref), "ref+1"
+    AssertTrue Not IsValidVehicleYear("1949", ref), "bajo el minimo"
+    AssertTrue Not IsValidVehicleYear("2028", ref), "ref+2"
+    AssertTrue Not IsValidVehicleYear("95", ref), "dos digitos"
+    AssertTrue Not IsValidVehicleYear("20a0", ref), "letra"
+    AssertTrue Not IsValidVehicleYear("", ref), "vacio"
+End Sub
+
+Public Sub Test_IsValidMileage()
+    AssertTrue IsValidMileage("0"), "cero"
+    AssertTrue IsValidMileage("123456789"), "9 digitos"
+    AssertTrue Not IsValidMileage("12,000"), "coma"
+    AssertTrue Not IsValidMileage("1.5"), "punto"
+    AssertTrue Not IsValidMileage("-5"), "negativo"
+    AssertTrue Not IsValidMileage("1234567890"), "10 digitos"
+    AssertTrue Not IsValidMileage(""), "vacio"
+End Sub
+
+Public Sub Test_IsValidVin()
+    AssertTrue IsValidVin("1HGCM82633A004352"), "17 mayusculas"
+    AssertTrue IsValidVin("1hgcm82633a004352"), "17 minusculas"
+    AssertTrue Not IsValidVin("1HGCM82633A00435"), "16"
+    AssertTrue Not IsValidVin("1HGCM82633A0043522"), "18"
+    AssertTrue Not IsValidVin("1HGCM 82633A004352"), "espacio interno"
+    AssertTrue Not IsValidVin(""), "vacio"
+End Sub

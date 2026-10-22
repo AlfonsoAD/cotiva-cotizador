@@ -30,6 +30,7 @@ Public Const ORDER_BASE_NUMBER As Long = 0              ' El primer folio será 
 Public Const ORDER_NUMBER_DIGITS As Long = 4
 
 ' --- Orden de servicio (sin transiciones forzadas entre estados) ---
+Public Const MIN_VEHICLE_YEAR As Long = 1950           ' Primer ano aceptado para el vehiculo
 Public Const ORDER_STATUS_RECEIVED As String = "Recibida"
 Public Const ORDER_STATUS_DIAGNOSIS As String = "En diagnóstico"
 Public Const ORDER_STATUS_REPAIR As String = "En reparación"
