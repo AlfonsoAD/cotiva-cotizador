@@ -7,6 +7,12 @@ Attribute VB_Name = "modUtils"
 '==============================================================================
 Option Explicit
 
+' Modo prueba (ver SetTestMode): guarda el ultimo error en vez de mostrar MsgBox.
+Private mTestMode As Boolean
+Private mLastErrorWhere As String
+Private mLastErrorNumber As Long
+Private mLastErrorDescription As String
+
 '--- Números -------------------------------------------------------------------
 
 ' Intenta convertir texto a número.
@@ -170,8 +176,49 @@ Public Sub ShowError(ByVal where As String)
     errNumber = Err.Number                      ' Se lee ANTES de hacer otra cosa
     errText = Err.Description
     Application.ScreenUpdating = True
+    If mTestMode Then
+        mLastErrorWhere = where
+        mLastErrorNumber = errNumber
+        mLastErrorDescription = errText
+        Exit Sub
+    End If
     MsgBox Fmt(MSG_ERROR, where, errNumber, errText), vbCritical, TTL_ERROR
 End Sub
+
+'--- Modo prueba -----------------------------------------------------------------
+
+' Solo lo enciende el runner de pruebas; el libro entregado nunca entra en modo prueba.
+' Enciende o apaga el modo prueba; solo lo usa el runner de pruebas (modTestRunner).
+Public Sub SetTestMode(ByVal enabled As Boolean)
+    mTestMode = enabled
+End Sub
+
+' True mientras el modo prueba esta encendido.
+Public Function IsTestMode() As Boolean
+    IsTestMode = mTestMode
+End Function
+
+' Vacia donde, numero y descripcion del ultimo error registrado.
+Public Sub ClearLastError()
+    mLastErrorWhere = vbNullString
+    mLastErrorNumber = 0
+    mLastErrorDescription = vbNullString
+End Sub
+
+' Lugar (el texto de ShowError) del ultimo error registrado en modo prueba.
+Public Function LastErrorWhere() As String
+    LastErrorWhere = mLastErrorWhere
+End Function
+
+' 0 = no hubo error desde ClearLastError.
+Public Function LastErrorNumber() As Long
+    LastErrorNumber = mLastErrorNumber
+End Function
+
+' Descripcion del ultimo error registrado en modo prueba.
+Public Function LastErrorDescription() As String
+    LastErrorDescription = mLastErrorDescription
+End Function
 
 '--- Importe con letra (formato usual en México) -------------------------------
 

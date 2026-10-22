@@ -12,3 +12,7 @@ check:
     # probar en Excel sigue siendo manual (build.ps1).
     - name: lint
       run: powershell -NoProfile -ExecutionPolicy Bypass -File build/lint.ps1 -Base {base}
+    # Compila y prueba el VBA en Excel (oculto). Requiere Excel de escritorio y tarda
+    # 1-2 minutos; sin Excel falla, no se salta.
+    - name: test
+      run: powershell -NoProfile -ExecutionPolicy Bypass -File build/test.ps1
