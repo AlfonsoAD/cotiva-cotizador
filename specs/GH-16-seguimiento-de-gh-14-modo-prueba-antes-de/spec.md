@@ -48,13 +48,13 @@
 
 ## Tasks
 
-- [ ] **T1 · Orden en `BeginTest`.** En `src/tests/modTestRunner.bas`, `BeginTest` queda `On Error GoTo Fail` → `SetTestMode True` → `ResetDataSheets` → `ClearLastError`. El comentario de arriba dice que activa el modo prueba y después deja el libro como recién abierto. Agrega una línea en blanco entre el `End Function` de `Report` y el comentario de `FindTests`.
+- [x] **T1 · Orden en `BeginTest`.** En `src/tests/modTestRunner.bas`, `BeginTest` queda `On Error GoTo Fail` → `SetTestMode True` → `ResetDataSheets` → `ClearLastError`. El comentario de arriba dice que activa el modo prueba y después deja el libro como recién abierto. Agrega una línea en blanco entre el `End Function` de `Report` y el comentario de `FindTests`.
   - Criterio: CUANDO `ResetDataSheets` lanza un error dentro de `BeginTest`, el modo prueba DEBE estar ya encendido (`IsTestMode() = True`) y la falla DEBE quedar anotada con `RecordFailure`, sin `MsgBox`.
   - Criterio: CUANDO `BeginTest` termina sin error, `IsTestMode()` DEBE ser True y no DEBE haber error registrado (`LastErrorNumber = 0`).
   - Criterio: `EndTest` no cambia y sigue apagando el modo prueba.
-- [ ] **T2 · Comentario de `SetTestMode`.** En `src/modules/modUtils.bas`, encima de `SetTestMode` queda un solo comentario: `' Enciende o apaga el modo prueba; solo lo usa el runner de pruebas (modTestRunner): el libro entregado nunca entra en modo prueba.`
+- [x] **T2 · Comentario de `SetTestMode`.** En `src/modules/modUtils.bas`, encima de `SetTestMode` queda un solo comentario: `' Enciende o apaga el modo prueba; solo lo usa el runner de pruebas (modTestRunner): el libro entregado nunca entra en modo prueba.`
   - Criterio: no hay dos líneas de comentario seguidas que repitan el mismo propósito. La codificación del archivo sigue en Windows-1252 con CRLF.
-- [ ] **T3 · Textos del flujo de `test.ps1`.**
+- [x] **T3 · Textos del flujo de `test.ps1`.**
   - `build/test.ps1` `.DESCRIPTION`: cambia "corre modTestRunner.RunAllTests" por "llama por COM a cada prueba (modTestRunner.ListTests, BeginTest, EndTest y Report)".
   - `specs/GH-14-pruebas-automaticas-de-vba-con-excel-test-ps1/spec.md`:
     - R1 empieza "CUANDO corre el runner (`RunAllTests` desde VBA, o `ListTests` y `BeginTest`/`EndTest` por prueba desde `test.ps1`)".
@@ -63,13 +63,13 @@
     - La línea 218 cambia `$report = Run("'<libro>'!modTestRunner.RunAllTests")` por: `Run("…ListTests")`; por cada prueba, `BeginTest`, `Run` de la prueba con `try/catch` y `EndTest`; al final `$report = Run("…Report", ok, falla, fallas)`.
   - `README.md`: línea en blanco antes de `## Flujo de trabajo`.
   - Criterio: `grep -n RunAllTests build/test.ps1` no regresa nada. En la spec de GH-14, ninguna línea dice que `test.ps1` corre `RunAllTests`.
-- [ ] **T4 · `--- FAIL:` por prueba en `test.ps1`** ([N3]). En el ciclo del hijo `-Worker`, cuando una prueba falla (`$recorded` o `$failure`), se agrega `"--- FAIL: $name"` a `$failureLines` antes de sus líneas `FALLA ...`. Se actualizan el comentario de `Report` en `modTestRunner.bas` y el párrafo de salida del README (línea 61): `test.ps1` antepone `--- FAIL: <modulo>.<prueba>` a las fallas de cada prueba.
+- [x] **T4 · `--- FAIL:` por prueba en `test.ps1`** ([N3]). En el ciclo del hijo `-Worker`, cuando una prueba falla (`$recorded` o `$failure`), se agrega `"--- FAIL: $name"` a `$failureLines` antes de sus líneas `FALLA ...`. Se actualizan el comentario de `Report` en `modTestRunner.bas` y el párrafo de salida del README (línea 61): `test.ps1` antepone `--- FAIL: <modulo>.<prueba>` a las fallas de cada prueba.
   - Criterio: CUANDO una prueba falla, la consola y `dist/test-results.txt` DEBEN tener una línea que empieza exactamente con `--- FAIL: <modulo>.<prueba>`, una sola por prueba aunque tenga varios asserts en rojo, seguida de sus líneas `FALLA ...`, y `test.ps1` DEBE salir con 1.
   - Criterio: CUANDO todas pasan, la salida DEBE ser la de hoy (sin `--- FAIL:`) y la primera línea sigue siendo `ok N / falla 0`.
-- [ ] **T5 · Rutas con espacios al lanzar el hijo** ([N4]). En el padre de `build/test.ps1`, `$childArgs` pasa `$PSCommandPath`, `$pidFilePath` y `$Results` entre comillas dobles (`'"' + $ruta + '"'`). El resto de los argumentos no cambia.
+- [x] **T5 · Rutas con espacios al lanzar el hijo** ([N4]). En el padre de `build/test.ps1`, `$childArgs` pasa `$PSCommandPath`, `$pidFilePath` y `$Results` entre comillas dobles (`'"' + $ruta + '"'`). El resto de los argumentos no cambia.
   - Criterio: CUANDO `TEMP` y `TMP` apuntan a una carpeta con espacios, `test.ps1` DEBE correr completo y salir con 0, sin error de conversión en `-TimeoutSeconds`.
   - Criterio: CUANDO `-Results` es una ruta con espacios, el archivo DEBE quedar en esa ruta.
-- [ ] **T6 · Verificación.**
+- [x] **T6 · Verificación.**
   - `powershell -ExecutionPolicy Bypass -File build\test.ps1` sale con 0 y `dist/test-results.txt` reporta el mismo número de pruebas que antes, con `falla 0` ([N1]).
   - Con `$env:TEMP` y `$env:TMP` en una carpeta con espacios (p. ej. `C:\Users\Alfonso Andrade\AppData\Local\Temp` en forma larga, no la corta `ALFONS~1`) y `-Results` en una ruta con espacios, sale con 0.
   - Con una `Public Sub Test_` temporal que falla dos asserts (no se sube), la salida trae una sola línea `--- FAIL: <modulo>.Test_...` seguida de dos `FALLA ...`, y sale con 1. La prueba temporal se borra antes del commit.

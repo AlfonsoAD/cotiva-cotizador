@@ -187,8 +187,7 @@ End Sub
 
 '--- Modo prueba -----------------------------------------------------------------
 
-' Solo lo enciende el runner de pruebas; el libro entregado nunca entra en modo prueba.
-' Enciende o apaga el modo prueba; solo lo usa el runner de pruebas (modTestRunner).
+' Enciende o apaga el modo prueba; solo lo usa el runner de pruebas (modTestRunner): el libro entregado nunca entra en modo prueba.
 Public Sub SetTestMode(ByVal enabled As Boolean)
     mTestMode = enabled
 End Sub

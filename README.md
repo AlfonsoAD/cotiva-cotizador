@@ -59,7 +59,7 @@ powershell -ExecutionPolicy Bypass -File build\test.ps1
 
 Arma en memoria (Excel oculto, sin guardar nada) un libro con el mismo código que `build.ps1` más
 `src/tests/`, corre cada prueba y escribe `dist/test-results.txt`. Imprime `ok N / falla M` y una
-línea por falla; sale con 0 solo si todo pasa y hubo al menos una prueba. Tarda 1-2 minutos y necesita
+línea por falla (con `--- FAIL: <modulo>.<prueba>` antes de las de cada prueba); sale con 0 solo si todo pasa y hubo al menos una prueba. Tarda 1-2 minutos y necesita
 Excel de escritorio. Es el paso `test` de `bflow check`.
 
 - `-Visible`: Excel visible, para depurar. `-TimeoutSeconds N`: límite de tiempo (300 por omisión).
@@ -77,6 +77,7 @@ versiones anteriores por código. Un error sin manejar dentro de una prueba cuen
 
 **Sigue siendo manual:** formularios, PDF, apariencia y los `MsgBox` que no pasan por `ShowError`
 (contraseña, diseño, PDF). `src/tests/` no entra al `.xlsm` que se entrega.
+
 ## Flujo de trabajo
 
 **Opción A (recomendada): editar en `src/`** (VS Code / Claude Code) → `build.ps1` → probar en Excel → commit.
