@@ -214,8 +214,14 @@ End Sub
 
 ' Muestra la hoja lista para capturar. La usa el botón "Mi empresa".
 Public Sub OpenCompanySheet()
+    On Error GoTo Fail
     If Not SheetExists(SHEET_COMPANY) Then Exit Sub
+    UnlockSheet ThisWorkbook.Worksheets(SHEET_COMPANY)
     RefreshColorSwatches
+    If Not ProtectAll() Then Exit Sub
     ThisWorkbook.Worksheets(SHEET_COMPANY).Activate
     ThisWorkbook.Worksheets(SHEET_COMPANY).Range(COMPANY_NAME_CELL).Select
+    Exit Sub
+Fail:
+    ShowError "OpenCompanySheet"
 End Sub
