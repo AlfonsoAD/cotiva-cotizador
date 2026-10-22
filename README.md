@@ -51,6 +51,10 @@ dist/          Salida del build (ignorada por Git)
 > El build abre Excel visible. Si aparece una ventana de error de VBA, significa que hay un error de
 > compilación: toma captura, cierra Excel y corrige en `src/`.
 
+### Colores de la empresa
+
+Los colores de B11 (principal) y B12 (secundario) de la hoja "Mi empresa" se aplican al formulario, a la portada (Inicio) y a la propia hoja "Mi empresa". La portada y la hoja se repintan al pulsar **Abrir cotizador**. Si B11 o B12 están vacías o no son un hexadecimal válido, se usan los colores de Cotiva.
+
 ## Pruebas automáticas
 
 ```powershell

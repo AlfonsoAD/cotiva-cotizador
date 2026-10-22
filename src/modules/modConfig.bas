@@ -107,7 +107,7 @@ Public Const DEFAULT_SECONDARY_HEX As String = "#1A2638"      ' Azul tinta Cotiv
 Public Const PDF_FOLDER As String = "Cotizaciones_PDF"        ' Subcarpeta para los PDF
 Public Const SAVE_WORKBOOK_ON_SAVE As Boolean = True          ' Guarda el .xlsm tras cada cotización
 Public Const HIDE_DATA_SHEETS As Boolean = True               ' Hojas BD_ invisibles para el usuario
-Public Const FORM_LOGO_FILE As String = "logo-form.jpg"  ' Logo del formulario en assets/ y, de respaldo, junto al libro
+Public Const FORM_LOGO_FILE As String = "logo-form.jpg"       ' Logo del formulario (assets/ o junto al libro)
 
 ' --- innobytes (pie del PDF y del formulario) ---
 ' Lo que quede vacío simplemente no se muestra.
