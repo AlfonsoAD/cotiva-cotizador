@@ -19,6 +19,8 @@ Private mIsDirty As Boolean             ' True si hay cambios sin guardar
 Private mSuppressEvents As Boolean      ' True mientras el CÓDIGO llena campos (no cuenta como cambio)
 Private mOverwriteConfirmed As Boolean  ' True si ya se confirmó sobrescribir este folio
 Private mFont As String                 ' Fuente de marca
+Private mPrimary As Long               ' Color principal de la empresa
+Private mSecondary As Long             ' Color secundario de la empresa
 
 '--- Controles sin eventos ---
 Private txtNumber As MSForms.TextBox
@@ -97,14 +99,16 @@ Private Sub BuildLayout()
     Me.Height = FORM_HEIGHT + (Me.Height - Me.InsideHeight)
 
     ' --- Barra superior: clara si hay logo (JPG con fondo blanco), tinta si no ---
+    mPrimary = PrimaryColor()
+    mSecondary = SecondaryColor()
     hasLogo = PlaceHeaderLogo()
     If hasLogo Then
         AddBand "c_Bar", 0, 0, FORM_WIDTH, 48, vbWhite, True
-        AddBand "c_BarLine", 0, 48, FORM_WIDTH, 2, BrandOrange(), False
+        AddBand "c_BarLine", 0, 48, FORM_WIDTH, 2, mPrimary, False
         AddLabel "c_Module", UI_MODULE, 142, 17, 120, 18, 11, True, TextGray()
     Else
-        AddBand "c_Bar", 0, 0, FORM_WIDTH, 48, BrandInk(), True
-        AddLabel "c_Brand", UI_BRAND, MARGIN, 12, 80, 24, 16, True, vbWhite
+        AddBand "c_Bar", 0, 0, FORM_WIDTH, 48, mSecondary, True
+        AddLabel "c_Brand", UI_BRAND, MARGIN, 12, 80, 24, 16, True, ContrastTextColor(mSecondary)
         AddLabel "c_Module", UI_MODULE, 104, 17, 120, 18, 11, False, BrandInkLight()
     End If
 
@@ -122,7 +126,7 @@ Private Sub BuildLayout()
     Set btnLoad = AddButton("c_Load", UI_BTN_LOAD, kindSecondary, rightEdge - 72, 13, 72, 22)
 
     ' --- Sección 1: datos de la cotización ---
-    AddLabel "c_Sec1", UI_SECTION_QUOTE, MARGIN, 62, 300, 12, 8, True, BrandOrange()
+    AddLabel "c_Sec1", UI_SECTION_QUOTE, MARGIN, 62, 300, 12, 8, True, mPrimary
     AddLabel "c_LNumber", UI_LBL_NUMBER, MARGIN, 80, 90, 12, 8, False, TextGray()
     AddLabel "c_LClient", UI_LBL_CLIENT, 116, 80, 250, 12, 8, False, TextGray()
     AddLabel "c_LDate", UI_LBL_DATE, 524, 80, 118, 12, 8, False, TextGray()
@@ -150,7 +154,7 @@ Private Sub BuildLayout()
     Set lblValidUntil = AddLabel("c_ValidUntil", "", 524, 118, 118, 12, 8, False, TextGray())
 
     ' --- Sección 2: captura de conceptos ---
-    AddLabel "c_Sec2", UI_SECTION_ITEM, MARGIN, 132, 300, 12, 8, True, BrandOrange()
+    AddLabel "c_Sec2", UI_SECTION_ITEM, MARGIN, 132, 300, 12, 8, True, mPrimary
     AddLabel "c_LQty", UI_LBL_QTY, MARGIN, 150, 64, 12, 8, False, TextGray()
     AddLabel "c_LDesc", UI_LBL_DESCRIPTION, 90, 150, 200, 12, 8, False, TextGray()
     AddLabel "c_LPrice", UI_LBL_PRICE, 388, 150, 90, 12, 8, False, TextGray()
@@ -165,7 +169,7 @@ Private Sub BuildLayout()
     txtPrice.TextAlign = fmTextAlignRight
     txtPrice.MaxLength = 15
 
-    Set lblAmount = AddLabel("c_Amount", "", 486, 164, 76, 22, 10, True, BrandInk(), fmTextAlignRight)
+    Set lblAmount = AddLabel("c_Amount", "", 486, 164, 76, 22, 10, True, mSecondary, fmTextAlignRight)
     With lblAmount
         .BackStyle = fmBackStyleOpaque
         .BackColor = Neutral50()
@@ -176,10 +180,10 @@ Private Sub BuildLayout()
 
     ' --- Lista de conceptos con encabezado de columnas ---
     AddBand "c_ListHead", MARGIN, 198, FORM_WIDTH - 2 * MARGIN, 20, Neutral100(), False
-    AddLabel "c_C1", UI_COL_QTY, 22, 202, 50, 12, 8, True, BrandInk()
-    AddLabel "c_C2", UI_COL_DESCRIPTION, 78, 202, 200, 12, 8, True, BrandInk()
-    AddLabel "c_C3", UI_COL_PRICE, 408, 202, 100, 12, 8, True, BrandInk()
-    AddLabel "c_C4", UI_COL_AMOUNT, 518, 202, 100, 12, 8, True, BrandInk()
+    AddLabel "c_C1", UI_COL_QTY, 22, 202, 50, 12, 8, True, mSecondary
+    AddLabel "c_C2", UI_COL_DESCRIPTION, 78, 202, 200, 12, 8, True, mSecondary
+    AddLabel "c_C3", UI_COL_PRICE, 408, 202, 100, 12, 8, True, mSecondary
+    AddLabel "c_C4", UI_COL_AMOUNT, 518, 202, 100, 12, 8, True, mSecondary
 
     Set lstItems = Me.Controls.Add("Forms.ListBox.1", "c_Items", True)
     Place lstItems, MARGIN, 218, FORM_WIDTH - 2 * MARGIN, 146
@@ -197,7 +201,7 @@ Private Sub BuildLayout()
 
     ' --- Totales ---
     AddLabel "c_LSub", UI_LBL_SUBTOTAL, 436, 374, 100, 14, 9, False, TextGray(), fmTextAlignRight
-    Set lblSubtotal = AddLabel("c_Subtotal", "", 540, 373, 102, 16, 10, False, BrandInk(), fmTextAlignRight)
+    Set lblSubtotal = AddLabel("c_Subtotal", "", 540, 373, 102, 16, 10, False, mSecondary, fmTextAlignRight)
 
     AddLabel "c_LTax", UI_LBL_TAX, 400, 392, 56, 14, 9, False, TextGray(), fmTextAlignRight
     Set cboTax = AddComboBox("c_TaxRate", 462, 389, 70, 19)
@@ -209,11 +213,11 @@ Private Sub BuildLayout()
         .Font.Size = 9
         .ControlTipText = TIP_TAX
     End With
-    Set lblTax = AddLabel("c_Tax", "", 540, 391, 102, 16, 10, False, BrandInk(), fmTextAlignRight)
+    Set lblTax = AddLabel("c_Tax", "", 540, 391, 102, 16, 10, False, mSecondary, fmTextAlignRight)
 
     AddBand "c_TotalLine", 436, 412, 206, 1, Neutral200(), False
-    AddLabel "c_LTotal", UI_LBL_TOTAL, 436, 422, 100, 16, 11, True, BrandInk(), fmTextAlignRight
-    Set lblTotal = AddLabel("c_Total", "", 520, 418, 122, 22, 15, True, BrandOrange(), fmTextAlignRight)
+    AddLabel "c_LTotal", UI_LBL_TOTAL, 436, 422, 100, 16, 11, True, mSecondary, fmTextAlignRight
+    Set lblTotal = AddLabel("c_Total", "", 520, 418, 122, 22, 15, True, mPrimary, fmTextAlignRight)
 
     ' --- Barra inferior de acciones ---
     AddBand "c_Footer", 0, 450, FORM_WIDTH, FORM_HEIGHT - 450, Neutral50(), True
@@ -298,7 +302,7 @@ Private Sub StyleInput(ByVal ctl As Object)
     ctl.BorderStyle = fmBorderStyleSingle         ' ...luego el borde sencillo
     ctl.BorderColor = Neutral300()
     ctl.BackColor = vbWhite
-    ctl.ForeColor = BrandInk()
+    ctl.ForeColor = mSecondary
     ctl.Font.Name = mFont
     ctl.Font.Size = 10
 End Sub
@@ -333,14 +337,14 @@ Private Function AddButton(ByVal ctlName As String, ByVal buttonText As String, 
     ctl.Font.Bold = True
     Select Case kind
         Case kindPrimary
-            ctl.BackColor = BrandOrange()
-            ctl.ForeColor = vbWhite
+            ctl.BackColor = mPrimary
+            ctl.ForeColor = ContrastTextColor(mPrimary)
         Case kindDark
-            ctl.BackColor = BrandInk()
-            ctl.ForeColor = vbWhite
+            ctl.BackColor = mSecondary
+            ctl.ForeColor = ContrastTextColor(mSecondary)
         Case Else
             ctl.BackColor = vbWhite
-            ctl.ForeColor = BrandInk()
+            ctl.ForeColor = mSecondary
     End Select
     Set AddButton = ctl
 End Function
@@ -592,7 +596,8 @@ Private Sub btnEdit_Click()
     txtPrice.Text = CStr(currentItem.UnitPrice)
 
     btnAdd.Caption = UI_BTN_UPDATE
-    btnAdd.BackColor = BrandOrange()              ' Resalta que estás editando
+    btnAdd.BackColor = mPrimary              ' Resalta que estás editando
+    btnAdd.ForeColor = ContrastTextColor(mPrimary)
     btnEdit.Caption = UI_BTN_CANCEL
     btnDelete.Enabled = False
     lstItems.Enabled = False
@@ -610,7 +615,8 @@ End Sub
 Private Sub ExitEditMode()
     mEditIndex = 0
     btnAdd.Caption = UI_BTN_ADD
-    btnAdd.BackColor = BrandInk()
+    btnAdd.BackColor = mSecondary
+    btnAdd.ForeColor = ContrastTextColor(mSecondary)
     btnEdit.Caption = UI_BTN_EDIT
     btnDelete.Enabled = True
     lstItems.Enabled = True
