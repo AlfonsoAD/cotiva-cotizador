@@ -19,6 +19,7 @@ Public Number As String            ' Folio, ej. "COT-1001"
 Public QuoteDate As Date           ' Fecha de emisión
 Public ClientName As String        ' Nombre del cliente
 Public TaxRate As Double           ' 0.16, 0.08 o 0
+Public OrderNumber As String       ' Folio de la orden ligada, ej. "OS-0001" (puede ir vacío)
 
 Private mItems As Collection       ' Conceptos (objetos QuoteItem)
 

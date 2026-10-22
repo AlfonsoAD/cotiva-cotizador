@@ -10,15 +10,17 @@ Attribute VB_Name = "modData"
 ' (una sola operación) en lugar de leer celda por celda.
 '
 ' Estructura (fila 1 = encabezados; se conservan en español por compatibilidad):
-'   BD_Cotizaciones  A:H  Folio | Fecha | Cliente | Subtotal | IVA | Total | TasaIVA | Vigencia
+'   BD_Cotizaciones  A:I  Folio | Fecha | Cliente | Subtotal | IVA | Total | TasaIVA | Vigencia | OrdenFolio
 '   BD_Detalle       A:E  Folio | Descripcion | Cantidad | PrecioUnitario | Total
-'   BD_Clientes      A:B  Cliente | FechaAlta
+'   BD_Clientes      A:F  Cliente | FechaAlta | Telefono1 | Telefono2 | Correo | Direccion
+'   BD_Ordenes       A:Z  Ver ServiceOrder.cls (26 columnas)
 '==============================================================================
 Option Explicit
 
-Private Const QUOTE_COLUMNS As Long = 8
+Private Const QUOTE_COLUMNS As Long = 9
 Private Const ITEM_COLUMNS As Long = 5
-Private Const CLIENT_COLUMNS As Long = 2
+Private Const CLIENT_COLUMNS As Long = 6
+Private Const ORDER_COLUMNS As Long = 26
 
 '--- Utilidades internas -------------------------------------------------------
 
@@ -162,7 +164,7 @@ Public Function SaveQuote(ByVal q As Quote) As Boolean
     r = LastRow(wsQuotes) + 1
     wsQuotes.Cells(r, 1).Resize(1, QUOTE_COLUMNS).Value = Array( _
         q.Number, q.QuoteDate, SafeCellText(q.ClientName), q.Subtotal, q.Tax, q.Total, _
-        q.TaxRate, q.ValidUntil(ValidityDays()))
+        q.TaxRate, q.ValidUntil(ValidityDays()), UCase$(Trim$(q.OrderNumber)))
     wsQuotes.Cells(r, 2).NumberFormat = "dd/mm/yyyy"
     wsQuotes.Cells(r, 4).Resize(1, 3).NumberFormat = "$#,##0.00"
     wsQuotes.Cells(r, 8).NumberFormat = "dd/mm/yyyy"
@@ -342,3 +344,32 @@ Public Sub SeedClientsFromQuotes()
         AddClient CStr(data(i, 3))
     Next i
 End Sub
+
+'--- Órdenes de servicio (esqueletos del contrato; la lógica llega en T2..T6) ---
+
+Public Function GetNextOrderNumber() As String
+    GetNextOrderNumber = vbNullString
+End Function
+
+Public Function OrderExists(ByVal orderNumber As String) As Boolean
+    OrderExists = False
+End Function
+
+Public Function SaveOrder(ByVal o As ServiceOrder) As Boolean
+    SaveOrder = False
+End Function
+
+Public Function LoadOrder(ByVal orderNumber As String) As ServiceOrder
+    Set LoadOrder = Nothing
+End Function
+
+' Tabla (0..n-1, 0..3): Folio, Cliente, Placas, Estado; Empty si no hay órdenes.
+Public Function ListOrders() As Variant
+    ListOrders = Empty
+End Function
+
+' Contacto del cliente en parámetros ByRef; False si no hay ningún dato.
+Public Function GetClientContact(ByVal clientText As String, ByRef phone1 As String, _
+        ByRef phone2 As String, ByRef email As String, ByRef address As String) As Boolean
+    GetClientContact = False
+End Function

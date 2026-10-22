@@ -18,11 +18,27 @@ Public Const SHEET_TEMPLATE As String = "Plantilla"
 Public Const SHEET_QUOTES As String = "BD_Cotizaciones"
 Public Const SHEET_ITEMS As String = "BD_Detalle"
 Public Const SHEET_CLIENTS As String = "BD_Clientes"
+Public Const SHEET_ORDERS As String = "BD_Ordenes"
 Public Const SHEET_COMPANY As String = "Mi empresa"
 
 ' --- Folios ---
 Public Const QUOTE_PREFIX As String = "COT-"
 Public Const QUOTE_BASE_NUMBER As Long = 1000          ' El primer folio será COT-1001
+Public Const QUOTE_NUMBER_DIGITS As Long = 0            ' Sin relleno: COT-1001
+Public Const ORDER_PREFIX As String = "OS-"
+Public Const ORDER_BASE_NUMBER As Long = 0              ' El primer folio será OS-0001
+Public Const ORDER_NUMBER_DIGITS As Long = 4
+
+' --- Orden de servicio (sin transiciones forzadas entre estados) ---
+Public Const ORDER_STATUS_RECEIVED As String = "Recibida"
+Public Const ORDER_STATUS_DIAGNOSIS As String = "En diagnóstico"
+Public Const ORDER_STATUS_REPAIR As String = "En reparación"
+Public Const ORDER_STATUS_READY As String = "Lista"
+Public Const ORDER_STATUS_DELIVERED As String = "Entregada"
+Public Const ORDER_STATUS_CANCELLED As String = "Cancelada"
+' Listas separadas por "|" (VBA no admite constantes de arreglo): Split(..., "|")
+Public Const ORDER_STATUSES As String = "Recibida|En diagnóstico|En reparación|Lista|Entregada|Cancelada"
+Public Const FUEL_LEVELS As String = "R|¼|½|¾|Lleno"
 
 ' --- Tasas de IVA ---
 ' El orden coincide con la lista del formulario (16% / 8% / Sin IVA).
