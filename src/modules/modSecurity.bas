@@ -46,7 +46,7 @@ Public Function ProtectAll() As Boolean
     End If
 
     ' Hojas de datos: protegidas y (opcionalmente) invisibles
-    For Each sheetName In Array(SHEET_QUOTES, SHEET_ITEMS, SHEET_CLIENTS)
+    For Each sheetName In Array(SHEET_QUOTES, SHEET_ITEMS, SHEET_CLIENTS, SHEET_ORDERS)
         If SheetExists(CStr(sheetName)) Then
             LockSheet ThisWorkbook.Worksheets(CStr(sheetName))
             If HIDE_DATA_SHEETS Then ThisWorkbook.Worksheets(CStr(sheetName)).Visible = xlSheetVeryHidden
@@ -79,7 +79,7 @@ Public Sub AdminUnlock()
         Exit Sub
     End If
 
-    For Each sheetName In Array(SHEET_QUOTES, SHEET_ITEMS, SHEET_CLIENTS, SHEET_TEMPLATE, SHEET_COMPANY, SHEET_HOME)
+    For Each sheetName In Array(SHEET_QUOTES, SHEET_ITEMS, SHEET_CLIENTS, SHEET_ORDERS, SHEET_TEMPLATE, SHEET_COMPANY, SHEET_HOME)
         If SheetExists(CStr(sheetName)) Then
             ThisWorkbook.Worksheets(CStr(sheetName)).Visible = xlSheetVisible
             UnlockSheet ThisWorkbook.Worksheets(CStr(sheetName))

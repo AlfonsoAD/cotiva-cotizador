@@ -1,6 +1,6 @@
 Attribute VB_Name = "modData"
 '==============================================================================
-' modData · Capa de datos (hojas BD_Cotizaciones, BD_Detalle y BD_Clientes)
+' modData · Capa de datos (hojas BD_Cotizaciones, BD_Detalle, BD_Clientes y BD_Ordenes)
 '
 ' Es el ÚNICO módulo que lee o escribe las hojas de datos. Si algún día migras
 ' a SQLite o a la API de Cotiva, reescribes solo este módulo respetando los
@@ -62,16 +62,37 @@ Private Sub DeleteRowsByNumber(ByVal ws As Worksheet, ByVal quoteNumber As Strin
     If Not target Is Nothing Then target.Delete
 End Sub
 
-' "COT-1005" -> 1005 ; formato inválido -> 0
-Private Function QuoteNumberValue(ByVal quoteNumber As String) As Long
+' "COT-1005" -> 1005 ; prefijo distinto o digitos invalidos -> 0
+Private Function FolioValue(ByVal folio As String, ByVal prefix As String) As Long
     Dim digits As String
 
-    quoteNumber = UCase$(Trim$(quoteNumber))
-    If Left$(quoteNumber, Len(QUOTE_PREFIX)) <> QUOTE_PREFIX Then Exit Function
+    folio = UCase$(Trim$(folio))
+    If Left$(folio, Len(prefix)) <> prefix Then Exit Function
 
-    digits = Mid$(quoteNumber, Len(QUOTE_PREFIX) + 1)
-    If Len(digits) > 0 And Len(digits) <= 9 Then          ' Máximo 9 dígitos: cabe en un Long
-        If digits Like String(Len(digits), "#") Then QuoteNumberValue = CLng(digits)
+    digits = Mid$(folio, Len(prefix) + 1)
+    If Len(digits) > 0 And Len(digits) <= 9 Then          ' Maximo 9 digitos: cabe en un Long
+        If digits Like String(Len(digits), "#") Then FolioValue = CLng(digits)
+    End If
+End Function
+
+' Siguiente folio libre de una hoja: el numero mas alto de la columna A + 1.
+' Con digits > 0 rellena con ceros a ese ancho; con 0 no rellena.
+Private Function NextFolio(ByVal ws As Worksheet, ByVal prefix As String, _
+        ByVal baseNumber As Long, ByVal digits As Long) As String
+    Dim data As Variant, i As Long, n As Long, highest As Long
+
+    highest = baseNumber
+    data = ReadData(ws, 2)
+    If Not IsEmpty(data) Then
+        For i = 1 To UBound(data, 1)
+            n = FolioValue(CStr(data(i, 1)), prefix)
+            If n > highest Then highest = n
+        Next i
+    End If
+    If digits > 0 Then
+        NextFolio = prefix & Format$(highest + 1, String$(digits, "0"))
+    Else
+        NextFolio = prefix & (highest + 1)
     End If
 End Function
 
@@ -89,14 +110,14 @@ End Sub
 
 '--- Estructura ----------------------------------------------------------------
 
-' Deja los encabezados completos en las 3 hojas de datos.
+' Deja los encabezados completos en las hojas de datos.
 ' Desbloquea las hojas; ProtectAll las vuelve a proteger al final.
 Public Sub EnsureDataHeaders()
     Dim ws As Worksheet
 
     Set ws = ThisWorkbook.Worksheets(SHEET_QUOTES)
     UnlockSheet ws
-    EnsureHeaders ws, Array("Folio", "Fecha", "Cliente", "Subtotal", "IVA", "Total", "TasaIVA", "Vigencia")
+    EnsureHeaders ws, Array("Folio", "Fecha", "Cliente", "Subtotal", "IVA", "Total", "TasaIVA", "Vigencia", "OrdenFolio")
 
     Set ws = ThisWorkbook.Worksheets(SHEET_ITEMS)
     UnlockSheet ws
@@ -105,7 +126,16 @@ Public Sub EnsureDataHeaders()
     If SheetExists(SHEET_CLIENTS) Then
         Set ws = ThisWorkbook.Worksheets(SHEET_CLIENTS)
         UnlockSheet ws
-        EnsureHeaders ws, Array("Cliente", "FechaAlta")
+        EnsureHeaders ws, Array("Cliente", "FechaAlta", "Telefono1", "Telefono2", "Correo", "Direccion")
+    End If
+
+    If SheetExists(SHEET_ORDERS) Then
+        Set ws = ThisWorkbook.Worksheets(SHEET_ORDERS)
+        UnlockSheet ws
+        EnsureHeaders ws, Array("Folio", "Estado", "Cliente", "Telefono1", "Telefono2", "Correo", _
+            "Direccion", "Marca", "Modelo", "Motor", "Anio", "Color", "Placas", "Kilometraje", _
+            "Combustible", "VIN", "FechaEntrada", "HoraEntrada", "RecibioPor", "FechaPromesa", _
+            "FechaSalida", "HoraSalida", "EntregoPor", "Solicitado", "Diagnostico", "CotizacionFolio")
     End If
 End Sub
 
@@ -113,17 +143,8 @@ End Sub
 
 ' Siguiente folio libre: el número más alto guardado + 1 (no depende del orden).
 Public Function GetNextQuoteNumber() As String
-    Dim data As Variant, i As Long, n As Long, highest As Long
-
-    highest = QUOTE_BASE_NUMBER
-    data = ReadData(ThisWorkbook.Worksheets(SHEET_QUOTES), 2)
-    If Not IsEmpty(data) Then
-        For i = 1 To UBound(data, 1)
-            n = QuoteNumberValue(CStr(data(i, 1)))
-            If n > highest Then highest = n
-        Next i
-    End If
-    GetNextQuoteNumber = QUOTE_PREFIX & (highest + 1)
+    GetNextQuoteNumber = NextFolio(ThisWorkbook.Worksheets(SHEET_QUOTES), QUOTE_PREFIX, _
+        QUOTE_BASE_NUMBER, QUOTE_NUMBER_DIGITS)
 End Function
 
 ' Fila donde está el folio en BD_Cotizaciones, o 0 si no existe.
@@ -215,6 +236,7 @@ Public Function LoadQuote(ByVal quoteNumber As String) As Quote
     If IsDate(cellValue) Then q.QuoteDate = CDate(cellValue) Else q.QuoteDate = Date
 
     q.ClientName = CStr(ws.Cells(r, 3).Value)
+    q.OrderNumber = Trim$(CStr(ws.Cells(r, 9).Value))
 
     ' Tasa: vacía = cotización de una versión anterior (16 %). Un 0 es "Sin IVA".
     If TryParseNumber(CStr(ws.Cells(r, 7).Value), rate) Then
@@ -345,31 +367,233 @@ Public Sub SeedClientsFromQuotes()
     Next i
 End Sub
 
-'--- Órdenes de servicio (esqueletos del contrato; la lógica llega en T2..T6) ---
+' Escribe (sin pisar con vacios) el contacto del cliente en el catalogo;
+' lo da de alta si no existe.
+Private Sub UpsertClientContact(ByVal clientText As String, ByVal phone1 As String, _
+        ByVal phone2 As String, ByVal email As String, ByVal address As String)
+    Dim ws As Worksheet, data As Variant, i As Long, r As Long, values As Variant, c As Long
+
+    clientText = Trim$(clientText)
+    If Len(clientText) = 0 Then Exit Sub
+    AddClient clientText
+
+    Set ws = ThisWorkbook.Worksheets(SHEET_CLIENTS)
+    data = ReadData(ws, CLIENT_COLUMNS)
+    If IsEmpty(data) Then Exit Sub
+    For i = 1 To UBound(data, 1)
+        If StrComp(Trim$(CStr(data(i, 1))), clientText, vbTextCompare) = 0 Then
+            r = i + 1
+            Exit For
+        End If
+    Next i
+    If r = 0 Then Exit Sub
+
+    values = Array(phone1, phone2, email, address)
+    ws.Range(ws.Cells(r, 3), ws.Cells(r, 4)).NumberFormat = "@"
+    For c = 0 To 3
+        If Len(Trim$(CStr(values(c)))) > 0 Then ws.Cells(r, 3 + c).Value = SafeCellText(Trim$(CStr(values(c))))
+    Next c
+End Sub
+
+' Contacto guardado del cliente; si el catalogo no tiene datos, el de su orden
+' mas reciente. False si no hay ningun dato.
+Public Function GetClientContact(ByVal clientText As String, ByRef phone1 As String, _
+        ByRef phone2 As String, ByRef email As String, ByRef address As String) As Boolean
+    Dim data As Variant, i As Long, best As Long, bestDate As Date, d As Date
+
+    phone1 = vbNullString: phone2 = vbNullString: email = vbNullString: address = vbNullString
+    clientText = Trim$(clientText)
+    If Len(clientText) = 0 Then Exit Function
+
+    data = ReadData(ThisWorkbook.Worksheets(SHEET_CLIENTS), CLIENT_COLUMNS)
+    If Not IsEmpty(data) Then
+        For i = 1 To UBound(data, 1)
+            If StrComp(Trim$(CStr(data(i, 1))), clientText, vbTextCompare) = 0 Then
+                phone1 = CStr(data(i, 3)): phone2 = CStr(data(i, 4))
+                email = CStr(data(i, 5)): address = CStr(data(i, 6))
+                Exit For
+            End If
+        Next i
+    End If
+    If Len(phone1 & phone2 & email & address) > 0 Then
+        GetClientContact = True
+        Exit Function
+    End If
+
+    data = ReadData(ThisWorkbook.Worksheets(SHEET_ORDERS), ORDER_COLUMNS)
+    If IsEmpty(data) Then Exit Function
+    For i = 1 To UBound(data, 1)
+        If StrComp(Trim$(CStr(data(i, 3))), clientText, vbTextCompare) = 0 Then
+            d = CellDate(data(i, 17))
+            If best = 0 Or d >= bestDate Then
+                best = i
+                bestDate = d
+            End If
+        End If
+    Next i
+    If best = 0 Then Exit Function
+
+    phone1 = CStr(data(best, 4)): phone2 = CStr(data(best, 5))
+    email = CStr(data(best, 6)): address = CStr(data(best, 7))
+    GetClientContact = (Len(phone1 & phone2 & email & address) > 0)
+End Function
+
+'--- Ordenes de servicio -------------------------------------------------------
 
 Public Function GetNextOrderNumber() As String
-    GetNextOrderNumber = vbNullString
+    GetNextOrderNumber = NextFolio(ThisWorkbook.Worksheets(SHEET_ORDERS), ORDER_PREFIX, _
+        ORDER_BASE_NUMBER, ORDER_NUMBER_DIGITS)
+End Function
+
+' Fecha de una celda; 0 si no es fecha.
+Private Function CellDate(ByVal v As Variant) As Date
+    If IsDate(v) Then CellDate = CDate(v)
+End Function
+
+' Fecha para escribir en la hoja: 0 ("sin valor") se guarda como celda vacia.
+Private Function DateOrBlank(ByVal d As Date) As Variant
+    If d = 0 Then DateOrBlank = Empty Else DateOrBlank = d
+End Function
+
+' Fila donde esta el folio en BD_Ordenes, o 0 si no existe.
+Private Function FindOrderRow(ByVal orderNumber As String) As Long
+    Dim data As Variant, i As Long
+
+    orderNumber = Trim$(orderNumber)
+    data = ReadData(ThisWorkbook.Worksheets(SHEET_ORDERS), 2)
+    If IsEmpty(data) Then Exit Function
+    For i = 1 To UBound(data, 1)
+        If StrComp(Trim$(CStr(data(i, 1))), orderNumber, vbTextCompare) = 0 Then
+            FindOrderRow = i + 1
+            Exit Function
+        End If
+    Next i
 End Function
 
 Public Function OrderExists(ByVal orderNumber As String) As Boolean
-    OrderExists = False
+    OrderExists = (FindOrderRow(orderNumber) > 0)
 End Function
 
+' Guarda (o reemplaza, si ya existia) una orden y pone su contacto en el catalogo
+' de clientes. Regresa True si todo salio bien.
 Public Function SaveOrder(ByVal o As ServiceOrder) As Boolean
-    SaveOrder = False
+    Dim ws As Worksheet, r As Long
+
+    On Error GoTo Fail
+    Application.ScreenUpdating = False
+
+    If Len(Trim$(o.Number)) = 0 Then o.Number = GetNextOrderNumber()
+    o.Number = UCase$(Trim$(o.Number))
+    Set ws = ThisWorkbook.Worksheets(SHEET_ORDERS)
+
+    DeleteRowsByNumber ws, o.Number
+    r = LastRow(ws) + 1
+
+    ' Telefonos, placas y VIN como texto: conservan el 0 inicial y no se interpretan
+    ws.Range(ws.Cells(r, 4), ws.Cells(r, 5)).NumberFormat = "@"
+    ws.Cells(r, 13).NumberFormat = "@"
+    ws.Cells(r, 16).NumberFormat = "@"
+    ws.Cells(r, 1).Resize(1, ORDER_COLUMNS).Value = Array( _
+        o.Number, SafeCellText(o.Status), SafeCellText(o.ClientName), SafeCellText(o.Phone1), _
+        SafeCellText(o.Phone2), SafeCellText(o.Email), SafeCellText(o.Address), _
+        SafeCellText(o.Make), SafeCellText(o.Model), SafeCellText(o.Engine), o.Year, _
+        SafeCellText(o.Color), SafeCellText(UCase$(Trim$(o.Plates))), o.Mileage, _
+        SafeCellText(o.FuelLevel), SafeCellText(UCase$(Trim$(o.Vin))), _
+        DateOrBlank(o.InDate), DateOrBlank(o.InTime), SafeCellText(o.ReceivedBy), _
+        DateOrBlank(o.PromisedDate), DateOrBlank(o.OutDate), DateOrBlank(o.OutTime), _
+        SafeCellText(o.DeliveredBy), SafeCellText(o.Requested), SafeCellText(o.Diagnosis), _
+        SafeCellText(o.QuoteNumber))
+    ws.Cells(r, 17).NumberFormat = "dd/mm/yyyy"
+    ws.Cells(r, 20).Resize(1, 2).NumberFormat = "dd/mm/yyyy"
+    ws.Cells(r, 18).NumberFormat = "hh:mm"
+    ws.Cells(r, 22).NumberFormat = "hh:mm"
+
+    UpsertClientContact o.ClientName, o.Phone1, o.Phone2, o.Email, o.Address
+    If SAVE_WORKBOOK_ON_SAVE And Len(ThisWorkbook.Path) > 0 Then ThisWorkbook.Save
+
+    SaveOrder = True
+Cleanup:
+    Application.ScreenUpdating = True
+    Exit Function
+Fail:
+    ShowError "SaveOrder " & o.Number
+    Resume Cleanup
 End Function
 
+' Carga una orden guardada. Regresa Nothing si el folio no existe.
+' Los datos leidos se validan: alguien pudo editar la hoja a mano.
 Public Function LoadOrder(ByVal orderNumber As String) As ServiceOrder
-    Set LoadOrder = Nothing
+    Dim ws As Worksheet, r As Long, v As Variant, o As ServiceOrder, n As Double
+
+    r = FindOrderRow(orderNumber)
+    If r = 0 Then Exit Function
+
+    Set ws = ThisWorkbook.Worksheets(SHEET_ORDERS)
+    v = ws.Range(ws.Cells(r, 1), ws.Cells(r, ORDER_COLUMNS)).Value
+    Set o = New ServiceOrder
+
+    o.Number = Trim$(CStr(v(1, 1)))
+    If Len(Trim$(CStr(v(1, 2)))) > 0 Then o.Status = Trim$(CStr(v(1, 2))) Else o.Status = ORDER_STATUS_RECEIVED
+    o.ClientName = CStr(v(1, 3))
+    o.Phone1 = CStr(v(1, 4))
+    o.Phone2 = CStr(v(1, 5))
+    o.Email = CStr(v(1, 6))
+    o.Address = CStr(v(1, 7))
+    o.Make = CStr(v(1, 8))
+    o.Model = CStr(v(1, 9))
+    o.Engine = CStr(v(1, 10))
+    If TryParseNumber(CStr(v(1, 11)), n) Then
+        If n >= 0 And n <= 9999 Then o.Year = CInt(n)
+    End If
+    o.Color = CStr(v(1, 12))
+    o.Plates = CStr(v(1, 13))
+    If TryParseNumber(CStr(v(1, 14)), n) Then
+        If n >= 0 And n <= 2147483647# Then o.Mileage = CLng(n)
+    End If
+    o.FuelLevel = CStr(v(1, 15))
+    o.Vin = CStr(v(1, 16))
+    o.InDate = CellDate(v(1, 17))
+    o.InTime = CellDate(v(1, 18))
+    o.ReceivedBy = CStr(v(1, 19))
+    o.PromisedDate = CellDate(v(1, 20))
+    o.OutDate = CellDate(v(1, 21))
+    o.OutTime = CellDate(v(1, 22))
+    o.DeliveredBy = CStr(v(1, 23))
+    o.Requested = CStr(v(1, 24))
+    o.Diagnosis = CStr(v(1, 25))
+    o.QuoteNumber = CStr(v(1, 26))
+
+    Set LoadOrder = o
 End Function
 
-' Tabla (0..n-1, 0..3): Folio, Cliente, Placas, Estado; Empty si no hay órdenes.
+' Tabla (0..n-1, 0..3): Folio, Cliente, Placas, Estado, de la mas reciente a la
+' mas antigua; Empty si no hay ordenes.
 Public Function ListOrders() As Variant
-    ListOrders = Empty
-End Function
+    Dim data As Variant, i As Long, totalRows As Long, n As Long, result() As String
 
-' Contacto del cliente en parámetros ByRef; False si no hay ningún dato.
-Public Function GetClientContact(ByVal clientText As String, ByRef phone1 As String, _
-        ByRef phone2 As String, ByRef email As String, ByRef address As String) As Boolean
-    GetClientContact = False
+    data = ReadData(ThisWorkbook.Worksheets(SHEET_ORDERS), ORDER_COLUMNS)
+    If IsEmpty(data) Then
+        ListOrders = Empty
+        Exit Function
+    End If
+
+    For i = 1 To UBound(data, 1)
+        If Len(Trim$(CStr(data(i, 1)))) > 0 Then totalRows = totalRows + 1
+    Next i
+    If totalRows = 0 Then
+        ListOrders = Empty
+        Exit Function
+    End If
+
+    ReDim result(0 To totalRows - 1, 0 To 3)
+    For i = UBound(data, 1) To 1 Step -1
+        If Len(Trim$(CStr(data(i, 1)))) > 0 Then
+            result(n, 0) = CStr(data(i, 1))
+            result(n, 1) = CStr(data(i, 3))
+            result(n, 2) = CStr(data(i, 13))
+            result(n, 3) = CStr(data(i, 2))
+            n = n + 1
+        End If
+    Next i
+    ListOrders = result
 End Function

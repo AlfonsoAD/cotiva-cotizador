@@ -206,7 +206,7 @@ Private Function DateOrBlank(ByVal d As Date) As Variant  ' 0 -> Empty
 
 No hay pruebas automáticas. Cada tarea se verifica con Depurar › Compilar, `build/build.ps1` y las pruebas manuales P1..P8.
 
-- [ ] **T1 · Contrato** (R4, R11, R20): constantes de `modConfig`; `ServiceOrder.cls` completa; `Quote.OrderNumber`; en `modData`, las firmas públicas nuevas como esqueletos que compilan (regresan False, Nothing o Empty) y las constantes `ORDER_COLUMNS`, `QUOTE_COLUMNS`, `CLIENT_COLUMNS`. Pruebas manuales definidas:
+- [x] **T1 · Contrato** (R4, R11, R20): constantes de `modConfig`; `ServiceOrder.cls` completa; `Quote.OrderNumber`; en `modData`, las firmas públicas nuevas como esqueletos que compilan (regresan False, Nothing o Empty) y las constantes `ORDER_COLUMNS`, `QUOTE_COLUMNS`, `CLIENT_COLUMNS`. Pruebas manuales definidas:
   - P1 `FolioOrdenVacio`: libro nuevo, `GetNextOrderNumber` = `OS-0001`.
   - P2 `FolioCotizacionIntacto`: un libro con `COT-1007` sigue dando `COT-1008`.
   - P3 `GuardarCargarOrden`: guardar una orden con los 26 campos y cargarla igual (placas y VIN en mayúsculas, teléfono con 0 inicial).
@@ -215,9 +215,9 @@ No hay pruebas automáticas. Cada tarea se verifica con Depurar › Compilar, `b
   - P6 `CotizacionConOrden`: `OrderNumber` se guarda en I y se conserva al guardar otra vez.
   - P7 `ClienteRegresa`: el contacto sale de `BD_Clientes`; si el catálogo está vacío, sale de la orden más reciente; un campo vacío no borra el dato guardado.
   - P8 `LibroAnterior`: un libro v8.0.0 abre, crea `BD_Ordenes`, agrega los encabezados I y C:F, y la hoja queda VeryHidden y protegida.
-- [ ] **T2 · Folios genéricos** (R1, R2, R3): `NextFolio` y `FolioValue`; `GetNextQuoteNumber` delega en ellas; `GetNextOrderNumber`. Verifica P1 y P2.
-- [ ] **T3 · Estructura y protección** (R18, R19): `EnsureDataHeaders` (I, C:F y los 26 de `BD_Ordenes`); `modApp.EnsureWorkbookStructure`; las listas de `modSecurity`. Verifica P8.
-- [ ] **T4 · Columna OrdenFolio** (R11, R12, R13): `SaveQuote` y `LoadQuote` con 9 columnas. Verifica P5 y P6.
-- [ ] **T5 · CRUD de órdenes** (R5, R6, R7, R8, R9, R10, R17): `FindOrderRow`, `OrderExists`, `SaveOrder` (sin llamar todavía a `UpsertClientContact`), `LoadOrder`, `ListOrders`, `CellDate`, `DateOrBlank`. Verifica P3 y P4.
-- [ ] **T6 · Contacto del cliente** (R14, R15, R16): `UpsertClientContact` (se llama desde `SaveOrder`) y `GetClientContact`. Verifica P7.
-- [ ] **T7 · Documentación** (R18): README, con `ServiceOrder` en classes, `BD_Ordenes` y las columnas nuevas en "Migrar datos"; cabecera de `modData`. Repaso completo P1..P8.
+- [x] **T2 · Folios genéricos** (R1, R2, R3): `NextFolio` y `FolioValue`; `GetNextQuoteNumber` delega en ellas; `GetNextOrderNumber`. Verifica P1 y P2.
+- [x] **T3 · Estructura y protección** (R18, R19): `EnsureDataHeaders` (I, C:F y los 26 de `BD_Ordenes`); `modApp.EnsureWorkbookStructure`; las listas de `modSecurity`. Verifica P8.
+- [x] **T4 · Columna OrdenFolio** (R11, R12, R13): `SaveQuote` y `LoadQuote` con 9 columnas. Verifica P5 y P6.
+- [x] **T5 · CRUD de órdenes** (R5, R6, R7, R8, R9, R10, R17): `FindOrderRow`, `OrderExists`, `SaveOrder` (sin llamar todavía a `UpsertClientContact`), `LoadOrder`, `ListOrders`, `CellDate`, `DateOrBlank`. Verifica P3 y P4.
+- [x] **T6 · Contacto del cliente** (R14, R15, R16): `UpsertClientContact` (se llama desde `SaveOrder`) y `GetClientContact`. Verifica P7.
+- [x] **T7 · Documentación** (R18): README, con `ServiceOrder` en classes, `BD_Ordenes` y las columnas nuevas en "Migrar datos"; cabecera de `modData`. Repaso completo P1..P8.
