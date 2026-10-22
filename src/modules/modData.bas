@@ -440,6 +440,8 @@ End Function
 
 '--- Ordenes de servicio -------------------------------------------------------
 
+' Siguiente folio de orden libre (OS-0001, OS-0002...), con el mismo criterio que
+' GetNextQuoteNumber pero con ORDER_PREFIX y relleno de ORDER_NUMBER_DIGITS.
 Public Function GetNextOrderNumber() As String
     GetNextOrderNumber = NextFolio(ThisWorkbook.Worksheets(SHEET_ORDERS), ORDER_PREFIX, _
         ORDER_BASE_NUMBER, ORDER_NUMBER_DIGITS)
@@ -470,6 +472,7 @@ Private Function FindOrderRow(ByVal orderNumber As String) As Long
     Next i
 End Function
 
+' True si el folio de la orden ya esta en BD_Ordenes (sin distinguir mayusculas).
 Public Function OrderExists(ByVal orderNumber As String) As Boolean
     OrderExists = (FindOrderRow(orderNumber) > 0)
 End Function
