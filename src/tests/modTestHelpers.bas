@@ -98,3 +98,14 @@ Public Sub MakeLegacyWorkbook()
     On Error GoTo 0
     Application.DisplayAlerts = alertsBefore
 End Sub
+
+' Escribe una celda de "Mi empresa" (p. ej. B11) y vuelve a proteger el libro.
+Public Sub SetCompanyCell(ByVal cellAddress As String, ByVal value As Variant)
+    Dim ws As Worksheet
+
+    TryUnprotectWorkbook
+    Set ws = ThisWorkbook.Worksheets(SHEET_COMPANY)
+    UnlockSheet ws
+    ws.Range(cellAddress).Value = value
+    ProtectAll
+End Sub

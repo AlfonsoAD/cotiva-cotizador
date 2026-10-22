@@ -34,8 +34,8 @@ Public Sub BuildWorkbook(ByVal assetsFolder As String)
     ImportLogo assetsFolder, "logo-cotiva.png", HOME_COTIVA_LOGO_NAME, True
     ImportLogo assetsFolder, "logo-innobytes.png", HOME_INNOBYTES_LOGO_NAME, True
 
-    If Len(Dir$(assetsFolder & "\logo-form.jpg")) > 0 Then
-        AddFormLogo assetsFolder & "\logo-form.jpg"
+    If Len(Dir$(assetsFolder & "\" & FORM_LOGO_FILE)) > 0 Then
+        AddFormLogo assetsFolder & "\" & FORM_LOGO_FILE
     End If
 
     ' 4) Portada
