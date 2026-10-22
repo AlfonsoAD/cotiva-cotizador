@@ -14,6 +14,7 @@ Public Sub AssertEqual(ByVal expected As Variant, ByVal actual As Variant, Optio
     End If
 End Sub
 
+' Falla si la condicion es falsa.
 Public Sub AssertTrue(ByVal condition As Boolean, Optional ByVal label As String)
     If Not condition Then modTestRunner.RecordFailure label & ": esperado verdadero, obtenido falso"
 End Sub

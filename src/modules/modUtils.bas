@@ -188,10 +188,12 @@ End Sub
 '--- Modo prueba -----------------------------------------------------------------
 
 ' Solo lo enciende el runner de pruebas; el libro entregado nunca entra en modo prueba.
+' Enciende o apaga el modo prueba; solo lo usa el runner de pruebas (modTestRunner).
 Public Sub SetTestMode(ByVal enabled As Boolean)
     mTestMode = enabled
 End Sub
 
+' True mientras el modo prueba esta encendido.
 Public Function IsTestMode() As Boolean
     IsTestMode = mTestMode
 End Function
@@ -203,6 +205,7 @@ Public Sub ClearLastError()
     mLastErrorDescription = vbNullString
 End Sub
 
+' Lugar (el texto de ShowError) del ultimo error registrado en modo prueba.
 Public Function LastErrorWhere() As String
     LastErrorWhere = mLastErrorWhere
 End Function
@@ -212,6 +215,7 @@ Public Function LastErrorNumber() As Long
     LastErrorNumber = mLastErrorNumber
 End Function
 
+' Descripcion del ultimo error registrado en modo prueba.
 Public Function LastErrorDescription() As String
     LastErrorDescription = mLastErrorDescription
 End Function
