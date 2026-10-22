@@ -623,5 +623,5 @@ End Function
 
 ' Nombres distintos de Recibio/Entrego en BD_Ordenes, orden alfabetico; Empty si no hay.
 Public Function ListOrderStaff() As Variant
-    Err.Raise vbObjectError + 513, "ListOrderStaff", "No implementado"
+    ListOrderStaff = Empty   ' Stub del contrato
 End Function

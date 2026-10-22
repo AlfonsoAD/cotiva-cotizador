@@ -166,6 +166,8 @@ Public Sub Test_ListOrderStaff_DistintosOrdenados()
     AssertTrue SaveOrder(o), "SaveOrder 2"
 
     staff = ListOrderStaff()
+    AssertTrue Not IsEmpty(staff), "hay nombres"
+    If IsEmpty(staff) Then Exit Sub
     AssertEqual 2, UBound(staff) - LBound(staff) + 1, "dos nombres"
     AssertEqual 0, LBound(staff), "0-based"
     AssertEqual "Ana", staff(0), "primero"
