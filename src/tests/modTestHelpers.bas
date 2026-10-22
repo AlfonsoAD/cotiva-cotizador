@@ -109,3 +109,9 @@ Public Sub SetCompanyCell(ByVal cellAddress As String, ByVal value As Variant)
     ws.Range(cellAddress).Value = value
     ProtectAll
 End Sub
+
+' Deja B11 y B12 vacias para que las demas pruebas vean los colores de Cotiva.
+Public Sub ClearCompanyColors()
+    SetCompanyCell COMPANY_PRIMARY_COLOR_CELL, ""
+    SetCompanyCell COMPANY_SECONDARY_COLOR_CELL, ""
+End Sub

@@ -41,7 +41,7 @@ Carril light: las firmas y los nombres van dentro de cada tarea en Tasks.
 
 ## Tasks
 
-- [ ] **T1 · Portada con colores de empresa** (`src/modules/modHome.bas`)
+- [x] **T1 · Portada con colores de empresa** (`src/modules/modHome.bas`)
   - Nuevo `Private Sub PaintHomeColors(ByVal ws As Worksheet)`:
     - Forma `HOME_RULE_NAME`: `.Fill.ForeColor.RGB = PrimaryColor()`.
     - Forma `HOME_BUTTON_NAME`: relleno `PrimaryColor()` y letra `ContrastTextColor(PrimaryColor())`.
@@ -55,16 +55,16 @@ Carril light: las firmas y los nombres van dentro de cada tarea en Tasks.
     - CUANDO B11/B12 están vacías o no son válidas, DEBEN usarse `BrandOrange()`/`BrandInk()`.
     - B2, B15, B16 y C15 NO DEBEN cambiar de color.
 
-- [ ] **T2 · Hoja "Mi empresa" con colores de empresa** (`src/modules/modCompany.bas`)
+- [x] **T2 · Hoja "Mi empresa" con colores de empresa** (`src/modules/modCompany.bas`)
   - `DesignCompanySheet`: la letra base de A1:D20 (línea 113) pasa a `SecondaryColor()` y el título A1 (línea 123) a `PrimaryColor()`. Las etiquetas de A4:A12, A2 y las notas conservan `TextGray()`.
   - `RefreshColorSwatches`: además de C11/C12, pinta A1 con `PrimaryColor()` y B4:B12 con `SecondaryColor()`. Actualiza su comentario.
   - Criterio: CUANDO cambian B11/B12 y se corre `RefreshColorSwatches`, A1 y B4:B12 DEBEN tomar los colores nuevos sin borrar lo capturado.
 
-- [ ] **T3 · Repintado al abrir el cotizador** (`src/modules/modApp.bas`)
+- [x] **T3 · Repintado al abrir el cotizador** (`src/modules/modApp.bas`)
   - En `PrepareWorkbook`, después de `EnsureWorkbookStructure` y antes de `ProtectAll`: `RefreshHomeColors`, después `UnlockSheet` de `SHEET_COMPANY` (si existe) y `RefreshColorSwatches`.
   - Criterio: CUANDO el usuario cambia B11/B12 y pulsa "Abrir cotizador", la portada y "Mi empresa" DEBEN quedar con los colores nuevos y protegidas, sin correr macros de administrador.
 
-- [ ] **T4 · Pruebas de color y limpieza con error** (`src/tests/modTestCompany.bas`, `src/tests/modTestHelpers.bas`)
+- [x] **T4 · Pruebas de color y limpieza con error** (`src/tests/modTestCompany.bas`, `src/tests/modTestHelpers.bas`)
   - `modTestHelpers`: nuevo `Public Sub ClearCompanyColors()`, que deja B11 y B12 en `""` usando `SetCompanyCell`.
   - Nueva `Test_SecondaryColor_InvalidaUsaCotiva`: `"#12G45Z"` y `"12345"` en B12 esperan `BrandInk()`, igual que la prueba de B11.
   - Nuevas pruebas:
@@ -85,7 +85,7 @@ Carril light: las firmas y los nombres van dentro de cada tarea en Tasks.
   - Criterio: CUANDO una prueba de color lanza un error a la mitad, B11 y B12 DEBEN quedar vacías y el runner DEBE registrar el error.
   - `build\test.ps1` en verde.
 
-- [ ] **T5 · Comentario de `FORM_LOGO_FILE` y documentación** (`src/modules/modConfig.bas`, `README.md`)
+- [x] **T5 · Comentario de `FORM_LOGO_FILE` y documentación** (`src/modules/modConfig.bas`, `README.md`)
   - En la línea 110, el comentario empieza en la misma columna que los de `PDF_FOLDER`, `SAVE_WORKBOOK_ON_SAVE` y `HIDE_DATA_SHEETS`. Si no cabe, va en la línea de arriba.
   - README, sección de "Mi empresa" y colores: los colores se aplican también a la portada y a "Mi empresa" al pulsar "Abrir cotizador". Agrega una entrada al changelog para consumidores, como en GH-18.
   - Prueba manual (en el PR): build, cambiar B11 a un color claro (`#F5D000`) y B12 a uno oscuro, pulsar "Abrir cotizador" y revisar la portada (botón con texto oscuro legible, crédito sin cambios) y "Mi empresa". Después, vaciar B11/B12 y comprobar que vuelven los colores de Cotiva.

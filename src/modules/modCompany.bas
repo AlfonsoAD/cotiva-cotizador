@@ -110,7 +110,7 @@ Private Sub DesignCompanySheet(ByVal ws As Worksheet)
     With ws.Range("A1:D20").Font
         .Name = BrandFont()
         .Size = 10
-        .Color = BrandInk()
+        .Color = SecondaryColor()
     End With
     ws.Columns("A").ColumnWidth = 40
     ws.Columns("B").ColumnWidth = 60
@@ -120,7 +120,7 @@ Private Sub DesignCompanySheet(ByVal ws As Worksheet)
         .Value = CMP_TITLE
         .Font.Size = 16
         .Font.Bold = True
-        .Font.Color = BrandOrange()
+        .Font.Color = PrimaryColor()
     End With
     With ws.Range("A2")
         .Value = CMP_SUBTITLE
@@ -200,12 +200,15 @@ Private Sub WriteNote(ByVal cell As Range, ByVal noteText As String)
     End With
 End Sub
 
-' Pinta las muestras de color junto a los códigos.
+' Pinta las muestras de color junto a los códigos, el título (A1) con el color
+' principal y el texto capturado (B4:B12) con el secundario.
 Public Sub RefreshColorSwatches()
     If Not SheetExists(SHEET_COMPANY) Then Exit Sub
     With ThisWorkbook.Worksheets(SHEET_COMPANY)
         .Range("C11").Interior.Color = PrimaryColor()
         .Range("C12").Interior.Color = SecondaryColor()
+        .Range("A1").Font.Color = PrimaryColor()
+        .Range("B4:B12").Font.Color = SecondaryColor()
     End With
 End Sub
 

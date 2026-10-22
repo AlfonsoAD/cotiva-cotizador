@@ -47,7 +47,7 @@ Public Sub DesignHome(Optional ByVal silent As Boolean = False)
     With ws.Range("A1:H40").Font
         .Name = fontName
         .Size = 10
-        .Color = BrandInk()
+        .Color = SecondaryColor()
     End With
     ws.Columns("A").ColumnWidth = 3               ' Margen izquierdo
     ws.Columns("B").ColumnWidth = 58
@@ -59,6 +59,7 @@ Public Sub DesignHome(Optional ByVal silent As Boolean = False)
     If Not ShapeExists(ws, HOME_COTIVA_LOGO_NAME) Then
         With ws.Range("B2")                       ' Texto de respaldo hasta que haya logo
             .Value = UI_BRAND
+            .Font.Color = BrandInk()
             .Font.Size = 22
             .Font.Bold = True
             .VerticalAlignment = xlCenter
@@ -66,7 +67,7 @@ Public Sub DesignHome(Optional ByVal silent As Boolean = False)
     End If
 
     ws.Rows(3).RowHeight = 14
-    AddBar ws, HOME_RULE_NAME, ws.Range("B3"), 64, 4, BrandOrange()
+    AddBar ws, HOME_RULE_NAME, ws.Range("B3"), 64, 4, PrimaryColor()
 
     ' --- 3. Título y subtítulo ---
     ws.Rows(4).RowHeight = 38
@@ -113,7 +114,6 @@ Public Sub DesignHome(Optional ByVal silent As Boolean = False)
             .Font.Size = 10
             .VerticalAlignment = xlCenter
         End With
-        ws.Range("B" & r).Characters(1, Len(HOME_BULLET)).Font.Color = BrandOrange()
     Next i
 
     ' --- 6. Separador ---
@@ -130,6 +130,7 @@ Public Sub DesignHome(Optional ByVal silent As Boolean = False)
     If Not ShapeExists(ws, HOME_INNOBYTES_LOGO_NAME) Then
         With ws.Range("B15")                      ' Texto de respaldo hasta que haya logo
             .Value = HOME_MAKER
+            .Font.Color = BrandInk()
             .Font.Size = 13
             .Font.Bold = True
             .VerticalAlignment = xlCenter
@@ -162,6 +163,7 @@ Public Sub DesignHome(Optional ByVal silent As Boolean = False)
     End With
 
     ' --- 8. Vista limpia ---
+    PaintHomeColors ws
     FitHomeLogos ws
     ws.Activate
     ActiveWindow.DisplayGridlines = False
@@ -177,6 +179,36 @@ Fail:
     Resume Cleanup
 End Sub
 
+' Repinta con los colores de empresa lo que depende de ellos. Solo cambia color:
+' no borra ni rehace formas, así que no toca logos ni textos. El crédito
+' (B2, B15, B16, C15) conserva sus colores.
+Private Sub PaintHomeColors(ByVal ws As Worksheet)
+    Dim r As Long
+
+    If ShapeExists(ws, HOME_RULE_NAME) Then
+        ws.Shapes(HOME_RULE_NAME).Fill.ForeColor.RGB = PrimaryColor()
+    End If
+    If ShapeExists(ws, HOME_BUTTON_NAME) Then
+        With ws.Shapes(HOME_BUTTON_NAME)
+            .Fill.ForeColor.RGB = PrimaryColor()
+            .TextFrame2.TextRange.Font.Fill.ForeColor.RGB = ContrastTextColor(PrimaryColor())
+        End With
+    End If
+    ws.Range("B4").Font.Color = SecondaryColor()
+    For r = HOME_FIRST_FEATURE_ROW To HOME_FIRST_FEATURE_ROW + 2
+        ws.Range("B" & r).Font.Color = SecondaryColor()
+        ws.Range("B" & r).Characters(1, Len(HOME_BULLET)).Font.Color = PrimaryColor()
+    Next r
+End Sub
+
+' Aplica a la portada los colores capturados en "Mi empresa". La hoja queda
+' desprotegida: quien llama la vuelve a proteger (ProtectAll).
+Public Sub RefreshHomeColors()
+    If Not SheetExists(SHEET_HOME) Then Exit Sub
+    UnlockSheet HomeSheet()
+    PaintHomeColors HomeSheet()
+End Sub
+
 ' Botón (rectángulo redondeado) con la macro OpenQuoteTool.
 Private Sub AddOpenButton(ByVal ws As Worksheet, ByVal fontName As String)
     Dim btn As Shape
@@ -185,7 +217,7 @@ Private Sub AddOpenButton(ByVal ws As Worksheet, ByVal fontName As String)
                                  ws.Range("B7").Top + 4, 200, 46)
     With btn
         .Name = HOME_BUTTON_NAME
-        .Fill.ForeColor.RGB = BrandOrange()
+        .Fill.ForeColor.RGB = PrimaryColor()
         .Line.Visible = msoFalse
         .Placement = xlMove
         .OnAction = "OpenQuoteTool"
@@ -196,7 +228,7 @@ Private Sub AddOpenButton(ByVal ws As Worksheet, ByVal fontName As String)
             .TextRange.Font.Bold = msoTrue
             .TextRange.Font.Size = 13
             .TextRange.Font.Name = fontName
-            .TextRange.Font.Fill.ForeColor.RGB = vbWhite
+            .TextRange.Font.Fill.ForeColor.RGB = ContrastTextColor(PrimaryColor())
         End With
     End With
 End Sub
