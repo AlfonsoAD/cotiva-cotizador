@@ -59,8 +59,8 @@ powershell -ExecutionPolicy Bypass -File build\test.ps1
 
 Arma en memoria (Excel oculto, sin guardar nada) un libro con el mismo código que `build.ps1` más
 `src/tests/`, corre cada prueba y escribe `dist/test-results.txt`. Imprime `ok N / falla M` y una
-línea por falla (con `--- FAIL: <modulo>.<prueba>` antes de las de cada prueba); sale con 0 solo si todo pasa y hubo al menos una prueba. Tarda 1-2 minutos y necesita
-Excel de escritorio. Es el paso `test` de `bflow check`.
+línea por falla (con `--- FAIL: <modulo>.<prueba>` antes de las de cada prueba); sale con 0 solo si todo
+pasa y hubo al menos una prueba. Tarda 1-2 minutos y necesita Excel de escritorio. Es el paso `test` de `bflow check`.
 
 - `-Visible`: Excel visible, para depurar. `-TimeoutSeconds N`: límite de tiempo (300 por omisión).
   Si se pasa (por ejemplo, un error de compilación dejó un diálogo abierto) mata solo el Excel que

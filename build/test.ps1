@@ -4,8 +4,8 @@
 
 .DESCRIPTION
   Arma en memoria un libro con el mismo codigo que build.ps1 mas src\tests\*.bas,
-  llama por COM a cada prueba (modTestRunner.ListTests, BeginTest, EndTest y Report) y escribe dist\test-results.txt. El libro nunca
-  se guarda en disco.
+  llama por COM a cada prueba (modTestRunner.ListTests, BeginTest, EndTest y Report) y escribe dist\test-results.txt.
+  El libro nunca se guarda en disco.
 
   Sale con 0 solo si hubo al menos una prueba y ninguna fallo; con 1 si falla una
   prueba, no hay pruebas, no hay Excel o se pasa el limite de tiempo.
