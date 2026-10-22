@@ -1,0 +1,7 @@
+# bflow.yaml — generado por bflow init. Solo lo propio de este repo; lo compartido va en el perfil.
+tracker:
+  adapter: github
+vcs:
+  host: github
+  base_branch: auto-repair-shop
+agent: [claude]
