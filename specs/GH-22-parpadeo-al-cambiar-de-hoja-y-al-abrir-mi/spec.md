@@ -67,7 +67,7 @@ Carril light: las firmas y los nombres van dentro de cada tarea en Tasks.
   - `Test_OpenCompanySheet_DejaPantallaEncendida`: con `ScreenUpdating = False` llama a `OpenCompanySheet` y espera `True`, con `SHEET_COMPANY` como hoja activa y protegida.
   - Criterio: `build\test.ps1` DEBE pasar con las pruebas nuevas y con las que ya existen (las de color de GH-20 llaman a `ProtectAll`).
 
-- [ ] **T4 · Diagnóstico manual y verificación** (sin código; el resultado va en el PR)
+- [x] **T4 · Diagnóstico manual y verificación** (sin código; el resultado va en el PR)
   - Con el build de esta rama, pulsa 3 veces "Mi empresa" (desde `frmQuote`) y 3 veces "Abrir cotizador" (desde la portada), y anota si parpadea.
   - Cambia de hoja con las pestañas (Inicio, Plantilla, Mi empresa) en tres libros: este build, un build de `v8.0.0` y un libro de Excel sin macros con una imagen. Anota en cuáles parpadea.
   - Si este build parpadea con las pestañas y `v8.0.0` no, registra en el PR la diferencia de formas e imágenes de la portada (nombres en `modConfig`, `HOME_*_LOGO_NAME`) y abre una tarea nueva. No se corrige en esta.
