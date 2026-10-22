@@ -63,7 +63,29 @@ if ($Worker) {
 
         Write-Host "Armando el libro y corriendo pruebas..."
         [void]$excel.Run("'" + $wb.Name + "'!modBuild.BuildWorkbook", (Join-Path $root 'assets'))
-        $report = [string]$excel.Run("'" + $wb.Name + "'!modTestRunner.RunAllTests")
+        # Cada prueba se llama por COM: un error sin manejar regresa aqui sin abrir el
+        # dialogo de depuracion (desde Application.Run dentro de VBA si lo abriria).
+        $book = "'" + $wb.Name + "'!"
+        $names = @(([string]$excel.Run($book + "modTestRunner.ListTests")) -split '\|' | Where-Object { $_ })
+        $passed = 0
+        $failed = 0
+        $failureLines = New-Object System.Collections.Generic.List[string]
+        foreach ($name in $names) {
+            [void]$excel.Run($book + "modTestRunner.BeginTest", $name)
+            $failure = ""
+            try {
+                [void]$excel.Run($book + $name)
+            } catch {
+                $com = $_.Exception.InnerException
+                if (-not $com) { $com = $_.Exception }
+                $failure = "FALLA ${name}: error {0:X8}: {1}" -f [int]$com.HResult, $com.Message
+            }
+            $recorded = [string]$excel.Run($book + "modTestRunner.EndTest")
+            if ($recorded) { $failureLines.Add($recorded) }
+            if ($failure) { $failureLines.Add($failure) }
+            if ($recorded -or $failure) { $failed++ } else { $passed++ }
+        }
+        $report = [string]$excel.Run($book + "modTestRunner.Report", $passed, $failed, ($failureLines -join "`n"))
         $report = ($report -replace "`r`n", "`n" -replace "`r", "`n").TrimEnd()
 
         $lines = $report -split "`n"
