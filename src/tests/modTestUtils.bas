@@ -46,7 +46,7 @@ Public Sub Test_TryParseNumber_Invalidos()
     AssertTrue Not TryParseNumber("abc", n), "abc"
 End Sub
 
-Public Sub Test_T1_IsValidRfc()
+Public Sub Test_IsValidRfc()
     AssertTrue IsValidRfc("ABC010203XY1"), "moral"
     AssertTrue IsValidRfc("ABCD010203XY1"), "fisica"
     AssertTrue IsValidRfc("abcd010203xy1"), "minusculas"
@@ -99,27 +99,27 @@ Handler:
     AssertTrue Len(LastErrorDescription()) > 0, "descripcion"
 End Sub
 
-Public Sub Test_T1_IsValidDate_AceptaFechas()
+Public Sub Test_IsValidDate_AceptaFechas()
     AssertTrue IsValidDate("15/03/2026"), "dd/mm/yyyy"
     AssertTrue IsValidDate(" 2026-03-15 "), "iso con espacios"
     AssertTrue IsValidDate("29/02/2024"), "bisiesto"
 End Sub
 
-Public Sub Test_T1_IsValidDate_RechazaTextoYVacio()
+Public Sub Test_IsValidDate_RechazaTextoYVacio()
     AssertTrue Not IsValidDate(""), "vacio"
     AssertTrue Not IsValidDate("   "), "solo espacios"
     AssertTrue Not IsValidDate("hola"), "texto"
     AssertTrue Not IsValidDate("31/02/2026"), "dia inexistente"
 End Sub
 
-Public Sub Test_T1_IsValidTime_AceptaHoras()
+Public Sub Test_IsValidTime_AceptaHoras()
     AssertTrue IsValidTime("9:05"), "H:MM"
     AssertTrue IsValidTime("09:05"), "HH:MM"
     AssertTrue IsValidTime("00:00"), "medianoche"
     AssertTrue IsValidTime("23:59"), "ultimo minuto"
 End Sub
 
-Public Sub Test_T1_IsValidTime_RechazaFueraDeFormato()
+Public Sub Test_IsValidTime_RechazaFueraDeFormato()
     AssertTrue Not IsValidTime("24:00"), "24:00"
     AssertTrue Not IsValidTime("12:60"), "12:60"
     AssertTrue Not IsValidTime("1205"), "sin dos puntos"
@@ -128,7 +128,7 @@ Public Sub Test_T1_IsValidTime_RechazaFueraDeFormato()
     AssertTrue Not IsValidTime(""), "vacio"
 End Sub
 
-Public Sub Test_T1_IsValidVehicleYear_Limites()
+Public Sub Test_IsValidVehicleYear_Limites()
     Dim ref As Date
     ref = DateSerial(2026, 6, 15)
     AssertTrue IsValidVehicleYear("1950", ref), "minimo"
@@ -140,7 +140,7 @@ Public Sub Test_T1_IsValidVehicleYear_Limites()
     AssertTrue Not IsValidVehicleYear("", ref), "vacio"
 End Sub
 
-Public Sub Test_T1_IsValidMileage()
+Public Sub Test_IsValidMileage()
     AssertTrue IsValidMileage("0"), "cero"
     AssertTrue IsValidMileage("123456789"), "9 digitos"
     AssertTrue Not IsValidMileage("12,000"), "coma"
@@ -150,7 +150,7 @@ Public Sub Test_T1_IsValidMileage()
     AssertTrue Not IsValidMileage(""), "vacio"
 End Sub
 
-Public Sub Test_T1_IsValidVin()
+Public Sub Test_IsValidVin()
     AssertTrue IsValidVin("1HGCM82633A004352"), "17 mayusculas"
     AssertTrue IsValidVin("1hgcm82633a004352"), "17 minusculas"
     AssertTrue Not IsValidVin("1HGCM82633A00435"), "16"
