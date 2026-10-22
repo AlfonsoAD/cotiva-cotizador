@@ -391,7 +391,14 @@ Private Sub UpsertClientContact(ByVal clientText As String, ByVal phone1 As Stri
     values = Array(phone1, phone2, email, address)
     ws.Range(ws.Cells(r, 3), ws.Cells(r, 4)).NumberFormat = "@"
     For c = 0 To 3
-        If Len(Trim$(CStr(values(c)))) > 0 Then ws.Cells(r, 3 + c).Value = SafeCellText(Trim$(CStr(values(c))))
+        If Len(Trim$(CStr(values(c)))) > 0 Then
+            ' Telefonos (formato texto): sin apostrofo, un "+52..." se guarda tal cual
+            If c < 2 Then
+                ws.Cells(r, 3 + c).Value = Trim$(CStr(values(c)))
+            Else
+                ws.Cells(r, 3 + c).Value = SafeCellText(Trim$(CStr(values(c))))
+            End If
+        End If
     Next c
 End Sub
 
@@ -480,13 +487,14 @@ End Function
 ' Guarda (o reemplaza, si ya existia) una orden y pone su contacto en el catalogo
 ' de clientes. Regresa True si todo salio bien.
 Public Function SaveOrder(ByVal o As ServiceOrder) As Boolean
-    Dim ws As Worksheet, r As Long
+    Dim ws As Worksheet, r As Long, label As String
 
     On Error GoTo Fail
     Application.ScreenUpdating = False
 
     If Len(Trim$(o.Number)) = 0 Then o.Number = GetNextOrderNumber()
     o.Number = UCase$(Trim$(o.Number))
+    label = o.Number
     Set ws = ThisWorkbook.Worksheets(SHEET_ORDERS)
 
     DeleteRowsByNumber ws, o.Number
@@ -497,15 +505,15 @@ Public Function SaveOrder(ByVal o As ServiceOrder) As Boolean
     ws.Cells(r, 13).NumberFormat = "@"
     ws.Cells(r, 16).NumberFormat = "@"
     ws.Cells(r, 1).Resize(1, ORDER_COLUMNS).Value = Array( _
-        o.Number, SafeCellText(o.Status), SafeCellText(o.ClientName), SafeCellText(o.Phone1), _
-        SafeCellText(o.Phone2), SafeCellText(o.Email), SafeCellText(o.Address), _
+        o.Number, SafeCellText(o.Status), SafeCellText(o.ClientName), Trim$(o.Phone1), _
+        Trim$(o.Phone2), SafeCellText(o.Email), SafeCellText(o.Address), _
         SafeCellText(o.Make), SafeCellText(o.Model), SafeCellText(o.Engine), o.Year, _
-        SafeCellText(o.Color), SafeCellText(UCase$(Trim$(o.Plates))), o.Mileage, _
-        SafeCellText(o.FuelLevel), SafeCellText(UCase$(Trim$(o.Vin))), _
+        SafeCellText(o.Color), UCase$(Trim$(o.Plates)), o.Mileage, _
+        SafeCellText(o.FuelLevel), UCase$(Trim$(o.Vin)), _
         DateOrBlank(o.InDate), DateOrBlank(o.InTime), SafeCellText(o.ReceivedBy), _
         DateOrBlank(o.PromisedDate), DateOrBlank(o.OutDate), DateOrBlank(o.OutTime), _
         SafeCellText(o.DeliveredBy), SafeCellText(o.Requested), SafeCellText(o.Diagnosis), _
-        SafeCellText(o.QuoteNumber))
+        SafeCellText(UCase$(Trim$(o.QuoteNumber))))
     ws.Cells(r, 17).NumberFormat = "dd/mm/yyyy"
     ws.Cells(r, 20).Resize(1, 2).NumberFormat = "dd/mm/yyyy"
     ws.Cells(r, 18).NumberFormat = "hh:mm"
@@ -519,7 +527,7 @@ Cleanup:
     Application.ScreenUpdating = True
     Exit Function
 Fail:
-    ShowError "SaveOrder " & o.Number
+    ShowError "SaveOrder " & label
     Resume Cleanup
 End Function
 
