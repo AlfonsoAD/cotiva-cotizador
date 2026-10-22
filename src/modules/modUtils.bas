@@ -173,6 +173,29 @@ Public Sub ShowError(ByVal where As String)
     MsgBox Fmt(MSG_ERROR, where, errNumber, errText), vbCritical, TTL_ERROR
 End Sub
 
+'--- Modo prueba -----------------------------------------------------------------
+
+' Solo lo enciende el runner de pruebas; el libro entregado nunca entra en modo prueba.
+Public Sub SetTestMode(ByVal enabled As Boolean)
+End Sub
+
+Public Function IsTestMode() As Boolean
+End Function
+
+' Vacia donde, numero y descripcion del ultimo error registrado.
+Public Sub ClearLastError()
+End Sub
+
+Public Function LastErrorWhere() As String
+End Function
+
+' 0 = no hubo error desde ClearLastError.
+Public Function LastErrorNumber() As Long
+End Function
+
+Public Function LastErrorDescription() As String
+End Function
+
 '--- Importe con letra (formato usual en México) -------------------------------
 
 ' 1044.00 -> "(MIL CUARENTA Y CUATRO PESOS 00/100 M.N.)"
