@@ -1,0 +1,85 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume|clear|compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bflow hook session-start",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|Edit|Write|MultiEdit|NotebookEdit|Read|Task|Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bflow guard --reads",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bflow guard --post",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bflow hook tokens",
+            "timeout": 20
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bflow hook tokens",
+            "timeout": 20
+          }
+        ]
+      },
+      {
+        "matcher": "bflow-.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bflow hook subagent-stop",
+            "timeout": 20
+          }
+        ]
+      }
+    ]
+  },
+  "permissions": {
+    "allow": [
+      "Bash(bflow *)"
+    ]
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "bflow statusline"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": ""
+  }
+}
