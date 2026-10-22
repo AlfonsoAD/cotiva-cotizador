@@ -36,20 +36,29 @@ Public Sub LockSheet(ByVal ws As Worksheet)
                UserInterfaceOnly:=True
 End Sub
 
-' Protege todo el libro. Regresa False si la clave no coincide.
+' Protege todo el libro. Regresa False si la clave no coincide. Deja
+' ScreenUpdating como lo traia quien la llama, tambien si hay error.
 Public Function ProtectAll() As Boolean
-    Dim sheetName As Variant
+    Dim sheetName As Variant, wasUpdating As Boolean
+    Dim errNumber As Long, errSource As String, errText As String
+
+    wasUpdating = Application.ScreenUpdating
+    Application.ScreenUpdating = False
+    On Error GoTo Fail
 
     If Not TryUnprotectWorkbook() Then
         MsgBox Fmt(MSG_WRONG_PASSWORD), vbCritical, TTL_WRONG_PASSWORD
-        Exit Function
+        GoTo Cleanup
     End If
 
     ' Hojas de datos: protegidas y (opcionalmente) invisibles
     For Each sheetName In Array(SHEET_QUOTES, SHEET_ITEMS, SHEET_CLIENTS, SHEET_ORDERS)
         If SheetExists(CStr(sheetName)) Then
             LockSheet ThisWorkbook.Worksheets(CStr(sheetName))
-            If HIDE_DATA_SHEETS Then ThisWorkbook.Worksheets(CStr(sheetName)).Visible = xlSheetVeryHidden
+            ' Reasignar .Visible redibuja las pestanas aunque no cambie nada
+            If HIDE_DATA_SHEETS And ThisWorkbook.Worksheets(CStr(sheetName)).Visible <> xlSheetVeryHidden Then
+                ThisWorkbook.Worksheets(CStr(sheetName)).Visible = xlSheetVeryHidden
+            End If
         End If
     Next sheetName
 
@@ -61,6 +70,13 @@ Public Function ProtectAll() As Boolean
     ' Estructura: no se pueden agregar, borrar, renombrar ni mostrar hojas
     ThisWorkbook.Protect Password:=APP_PASSWORD, Structure:=True
     ProtectAll = True
+Cleanup:
+    Application.ScreenUpdating = wasUpdating
+    Exit Function
+Fail:
+    errNumber = Err.Number: errSource = Err.Source: errText = Err.Description
+    Application.ScreenUpdating = wasUpdating
+    Err.Raise errNumber, errSource, errText
 End Function
 
 ' [Administrador] Pide la clave y deja todo visible y editable.
