@@ -464,6 +464,12 @@ Private Function DateOrBlank(ByVal d As Date) As Variant
     If d = 0 Then DateOrBlank = Empty Else DateOrBlank = d
 End Function
 
+' Hora para escribir en la hoja: con fecha asociada, 0 es medianoche valida (00:00);
+' sin fecha ni hora la celda queda vacia.
+Private Function TimeOrBlank(ByVal t As Date, ByVal d As Date) As Variant
+    If t = 0 And d = 0 Then TimeOrBlank = Empty Else TimeOrBlank = t
+End Function
+
 ' Fila donde esta el folio en BD_Ordenes, o 0 si no existe.
 Private Function FindOrderRow(ByVal orderNumber As String) As Long
     Dim data As Variant, i As Long
@@ -497,8 +503,9 @@ Public Function SaveOrder(ByVal o As ServiceOrder) As Boolean
     label = o.Number
     Set ws = ThisWorkbook.Worksheets(SHEET_ORDERS)
 
-    DeleteRowsByNumber ws, o.Number
-    r = LastRow(ws) + 1
+    ' Se escribe sobre la fila existente: si la escritura falla no se pierde la orden anterior
+    r = FindOrderRow(o.Number)
+    If r = 0 Then r = LastRow(ws) + 1
 
     ' Telefonos, placas y VIN como texto: conservan el 0 inicial y no se interpretan
     ws.Range(ws.Cells(r, 4), ws.Cells(r, 5)).NumberFormat = "@"
@@ -510,8 +517,8 @@ Public Function SaveOrder(ByVal o As ServiceOrder) As Boolean
         SafeCellText(o.Make), SafeCellText(o.Model), SafeCellText(o.Engine), o.Year, _
         SafeCellText(o.Color), UCase$(Trim$(o.Plates)), o.Mileage, _
         SafeCellText(o.FuelLevel), UCase$(Trim$(o.Vin)), _
-        DateOrBlank(o.InDate), DateOrBlank(o.InTime), SafeCellText(o.ReceivedBy), _
-        DateOrBlank(o.PromisedDate), DateOrBlank(o.OutDate), DateOrBlank(o.OutTime), _
+        DateOrBlank(o.InDate), TimeOrBlank(o.InTime, o.InDate), SafeCellText(o.ReceivedBy), _
+        DateOrBlank(o.PromisedDate), DateOrBlank(o.OutDate), TimeOrBlank(o.OutTime, o.OutDate), _
         SafeCellText(o.DeliveredBy), SafeCellText(o.Requested), SafeCellText(o.Diagnosis), _
         SafeCellText(UCase$(Trim$(o.QuoteNumber))))
     ws.Cells(r, 17).NumberFormat = "dd/mm/yyyy"
