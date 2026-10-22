@@ -216,12 +216,16 @@ End Sub
 Public Sub OpenCompanySheet()
     On Error GoTo Fail
     If Not SheetExists(SHEET_COMPANY) Then Exit Sub
+    Application.ScreenUpdating = False
     UnlockSheet ThisWorkbook.Worksheets(SHEET_COMPANY)
     RefreshColorSwatches
-    If Not ProtectAll() Then Exit Sub
+    If Not ProtectAll() Then GoTo Cleanup
     ThisWorkbook.Worksheets(SHEET_COMPANY).Activate
     ThisWorkbook.Worksheets(SHEET_COMPANY).Range(COMPANY_NAME_CELL).Select
+Cleanup:
+    Application.ScreenUpdating = True
     Exit Sub
 Fail:
     ShowError "OpenCompanySheet"
+    Resume Cleanup
 End Sub

@@ -137,6 +137,48 @@ Cleanup:
     If errNumber <> 0 Then Err.Raise errNumber, , errText
 End Sub
 
+Public Sub Test_ProtectAll_ConservaScreenUpdating()
+    Dim errNumber As Long, errText As String
+    On Error GoTo Cleanup
+    Application.ScreenUpdating = False
+    AssertTrue ProtectAll(), "ProtectAll regresa True"
+    AssertEqual False, Application.ScreenUpdating, "sigue apagada"
+    Application.ScreenUpdating = True
+    AssertTrue ProtectAll(), "ProtectAll regresa True"
+    AssertEqual True, Application.ScreenUpdating, "sigue encendida"
+Cleanup:
+    errNumber = Err.Number: errText = Err.Description
+    Application.ScreenUpdating = True
+    If errNumber <> 0 Then Err.Raise errNumber, , errText
+End Sub
+
+Public Sub Test_ProtectAll_NoReasignaHojasOcultas()
+    Dim sheetName As Variant, ws As Worksheet
+    AssertTrue ProtectAll(), "primera llamada"
+    AssertTrue ProtectAll(), "segunda llamada"
+    For Each sheetName In Array(SHEET_QUOTES, SHEET_ITEMS, SHEET_CLIENTS, SHEET_ORDERS)
+        If SheetExists(CStr(sheetName)) Then
+            Set ws = ThisWorkbook.Worksheets(CStr(sheetName))
+            AssertEqual xlSheetVeryHidden, ws.Visible, "oculta: " & sheetName
+            AssertTrue ws.ProtectContents, "protegida: " & sheetName
+        End If
+    Next sheetName
+End Sub
+
+Public Sub Test_OpenCompanySheet_DejaPantallaEncendida()
+    Dim errNumber As Long, errText As String
+    On Error GoTo Cleanup
+    Application.ScreenUpdating = False
+    OpenCompanySheet
+    AssertEqual True, Application.ScreenUpdating, "pantalla encendida"
+    AssertEqual SHEET_COMPANY, ActiveSheet.Name, "hoja activa"
+    AssertTrue ThisWorkbook.Worksheets(SHEET_COMPANY).ProtectContents, "hoja protegida"
+Cleanup:
+    errNumber = Err.Number: errText = Err.Description
+    Application.ScreenUpdating = True
+    If errNumber <> 0 Then Err.Raise errNumber, , errText
+End Sub
+
 Public Sub Test_FormLogoFile_NombreUnico()
     AssertEqual "logo-form.jpg", FORM_LOGO_FILE, "nombre del logo del formulario"
 End Sub
