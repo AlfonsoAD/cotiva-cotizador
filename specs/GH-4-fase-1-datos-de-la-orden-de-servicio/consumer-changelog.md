@@ -47,6 +47,7 @@ Este cambio es aditivo: no quita ni renombra columnas, hojas ni folios existente
 - Estados válidos (`Status`): `Recibida`, `En diagnóstico`, `En reparación`, `Lista`, `Entregada`, `Cancelada`.
 - Niveles de combustible (`FuelLevel`): `R`, `¼`, `½`, `¾`, `Lleno`.
 - Placas y VIN se guardan en mayúsculas. Teléfonos, placas y VIN son texto (conservan el 0 inicial).
+- `QuoteNumber` se guarda sin espacios y en mayúsculas (ej. `COT-1001`).
 - Fechas y horas vacías se guardan como celda vacía. `Year` = 0 significa "sin año".
 - Consumidor: la hoja está oculta y protegida. Si necesitas leerla desde otra herramienta, hazlo por encabezado. Un folio se repite como máximo una vez; al guardar de nuevo, la fila anterior se reemplaza.
 
