@@ -171,7 +171,7 @@ Public Sub Test_OpenCompanySheet_DejaPantallaEncendida()
     Application.ScreenUpdating = False
     OpenCompanySheet
     AssertEqual True, Application.ScreenUpdating, "pantalla encendida"
-    AssertEqual SHEET_COMPANY, ActiveSheet.Name, "hoja activa"
+    AssertEqual SHEET_COMPANY, ThisWorkbook.Windows(1).SelectedSheets(1).Name, "hoja activa"
     AssertTrue ThisWorkbook.Worksheets(SHEET_COMPANY).ProtectContents, "hoja protegida"
 Cleanup:
     errNumber = Err.Number: errText = Err.Description
