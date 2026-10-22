@@ -26,8 +26,11 @@ src/
   classes/     Quote, QuoteItem, ServiceOrder
   forms/       frmQuote.vba (solo código; la interfaz se construye por código)
   build/       modBuild.bas (arma el libro; se elimina del .xlsm final)
+  tests/       Pruebas automáticas (solo viven en el libro de pruebas, nunca en el .xlsm)
 build/
   build.ps1    Genera dist/Cotiva-Cotizador.xlsm
+  test.ps1     Compila y prueba el VBA en Excel (dist/test-results.txt)
+  lib.ps1      Armado común de build.ps1 y test.ps1
   export.ps1   Exporta el código de un .xlsm de vuelta a src/
 assets/        Logos opcionales para el build (ver assets/README.md)
 dist/          Salida del build (ignorada por Git)
@@ -48,6 +51,32 @@ dist/          Salida del build (ignorada por Git)
 > El build abre Excel visible. Si aparece una ventana de error de VBA, significa que hay un error de
 > compilación: toma captura, cierra Excel y corrige en `src/`.
 
+## Pruebas automáticas
+
+```powershell
+powershell -ExecutionPolicy Bypass -File build\test.ps1
+```
+
+Arma en memoria (Excel oculto, sin guardar nada) un libro con el mismo código que `build.ps1` más
+`src/tests/`, corre cada prueba y escribe `dist/test-results.txt`. Imprime `ok N / falla M` y una
+línea por falla; sale con 0 solo si todo pasa y hubo al menos una prueba. Tarda 1-2 minutos y necesita
+Excel de escritorio. Es el paso `test` de `bflow check`.
+
+- `-Visible`: Excel visible, para depurar. `-TimeoutSeconds N`: límite de tiempo (300 por omisión).
+  Si se pasa (por ejemplo, un error de compilación dejó un diálogo abierto) mata solo el Excel que
+  lanzó y avisa "tiempo agotado"; corre `build.ps1` para ver el error.
+- Sin `src/modules/modSecrets.bas` usa `modSecrets.example.bas`; no crea archivos en `src/`.
+- Mientras corre, "Confiar en el acceso al modelo de objetos de VBA" queda encendido; se restaura al terminar.
+
+**Agregar una prueba:** en un módulo `src/tests/modTest*.bas` escribe `Public Sub Test_Nombre()` sin
+parámetros y usa `AssertEqual esperado, obtenido, "etiqueta"`, `AssertTrue condición, "etiqueta"` o
+`AssertFails "modulo.Macro", "etiqueta", args...`. Antes de cada prueba las hojas `BD_*` quedan solo con
+encabezados, como en un libro recién abierto. Con el modo prueba, `ShowError` no muestra `MsgBox` y deja el
+error en `LastErrorNumber`/`LastErrorWhere`. `modTestHelpers` tiene datos de ejemplo y arma libros de
+versiones anteriores por código. Un error sin manejar dentro de una prueba cuenta como falla.
+
+**Sigue siendo manual:** formularios, PDF, apariencia y los `MsgBox` que no pasan por `ShowError`
+(contraseña, diseño, PDF). `src/tests/` no entra al `.xlsm` que se entrega.
 ## Flujo de trabajo
 
 **Opción A (recomendada): editar en `src/`** (VS Code / Claude Code) → `build.ps1` → probar en Excel → commit.

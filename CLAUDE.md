@@ -20,7 +20,8 @@ La sesión principal conduce las tareas con la skill `bflow`: pregunta al humano
 | `src/classes/` | Modelo (`Quote`, `QuoteItem`), sin acceso a hojas |
 | `src/forms/` | Código de formularios; la interfaz se construye por código |
 | `src/build/modBuild.bas` | Arma el libro durante el build y se elimina del `.xlsm` final |
-| `build/` | `build.ps1` (src → `.xlsm`) y `export.ps1` (`.xlsm` → src) |
+| `src/tests/` | Pruebas automáticas (`modTest*`, `modAssert`, `modTestRunner`); solo van al libro de pruebas, nunca al `.xlsm` |
+| `build/` | `build.ps1` (src → `.xlsm`), `test.ps1` (compila y prueba en Excel), `lib.ps1` (armado común) y `export.ps1` (`.xlsm` → src) |
 | `assets/` | Logos opcionales para el build |
 | `.claude/skills/vba-cotizador/` | Reglas de código VBA del repo |
 | `README.md` | Uso, distribución, seguridad, macros de administrador y migración de datos |
@@ -29,4 +30,4 @@ La sesión principal conduce las tareas con la skill `bflow`: pregunta al humano
 - Build: `powershell -ExecutionPolicy Bypass -File build\build.ps1` → `dist/Cotiva-Cotizador.xlsm`. Requiere Excel de escritorio y `src/modules/modSecrets.bas` (copia de `modSecrets.example.bas`; nunca se sube). Abre Excel visible: un diálogo de VBA es un error de compilación, se corrige en `src/`.
 - Export: `powershell -ExecutionPolicy Bypass -File build\export.ps1 [-Workbook ruta.xlsm]` para traer a `src/` lo editado en el editor de VBA.
 - Nunca edites el `.xlsm` a mano ni lo subas al repo (`dist/` está ignorado). `.gitattributes` convierte el código a Windows-1252 con CRLF en la copia de trabajo: no cambies la codificación de los archivos de `src/`.
-- No hay tests automáticos: la verificación es compilar, correr `build.ps1` y probar en Excel nuevo, guardar, cargar, PDF y datos de versiones anteriores.
+- Pruebas: `powershell -ExecutionPolicy Bypass -File build\test.ps1` compila y corre las `Test_*` de `src/tests/` en un Excel oculto y escribe `dist/test-results.txt` (1-2 min; es el paso `test` de `bflow check`). Para agregar una, `Public Sub Test_Nombre()` en un `modTest*.bas` con `AssertEqual`/`AssertTrue`/`AssertFails`; detalles en el README. Sigue siendo manual: formularios, PDF y apariencia (build, Excel nuevo, guardar, cargar, PDF y datos de versiones anteriores).
