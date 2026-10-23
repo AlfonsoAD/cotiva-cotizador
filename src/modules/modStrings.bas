@@ -239,3 +239,5 @@ Public Const MSG_UNSAVED_NEW_ORDER As String = "Hay cambios sin guardar que se p
 Public Const MSG_UNSAVED_CLOSE_ORDER As String = "Hay cambios sin guardar. ¿Cerrar la orden de todos modos?"
 Public Const TTL_NEW_ORDER As String = "Nueva orden"
 Public Const TTL_CLOSE_ORDER As String = "Cerrar orden"
+Public Const UI_ORDER_BANNER As String = "Orden {0}"
+Public Const UI_ORDER_BANNER_PLATES As String = "Placas {0}"

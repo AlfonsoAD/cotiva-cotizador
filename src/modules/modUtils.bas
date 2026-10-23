@@ -158,6 +158,53 @@ Public Function NewQuoteItem(ByVal qtyValue As Double, ByVal descText As String,
     Set NewQuoteItem = newItem
 End Function
 
+'--- Orden a cotización ---------------------------------------------------------
+
+' Renglones del diagnóstico: parte en vbCrLf/vbLf/vbCr, recorta y omite vacíos.
+Public Function DiagnosisLines(ByVal diagnosisText As String) As Collection
+    Dim result As New Collection, parts() As String, i As Long, lineText As String
+
+    parts = Split(Replace(Replace(diagnosisText, vbCrLf, vbLf), vbCr, vbLf), vbLf)
+    For i = LBound(parts) To UBound(parts)
+        lineText = Trim$(parts(i))
+        If Len(lineText) > 0 Then result.Add lineText
+    Next i
+    Set DiagnosisLines = result
+End Function
+
+' Cotización nueva (sin guardar) con un concepto por renglón del diagnóstico, hasta MAX_ITEMS.
+Public Function QuoteFromOrder(ByVal o As ServiceOrder, ByVal quoteNumber As String) As Quote
+    Dim q As Quote, rows As Collection, i As Long
+
+    Set q = New Quote
+    q.Number = quoteNumber
+    q.ClientName = o.ClientName
+    q.OrderNumber = o.Number
+    q.QuoteDate = Date
+    Set rows = DiagnosisLines(o.Diagnosis)
+    For i = 1 To rows.Count
+        If i > MAX_ITEMS Then Exit For
+        q.AddItem NewQuoteItem(1, Left$(CStr(rows(i)), MAX_ITEM_DESCRIPTION), 0)
+    Next i
+    Set QuoteFromOrder = q
+End Function
+
+' Texto de la franja de frmQuote. o puede ser Nothing; sin folio regresa "".
+Public Function OrderBannerText(ByVal orderNumber As String, ByVal o As ServiceOrder) As String
+    Dim vehicle As String, plates As String, part As Variant
+
+    If Len(Trim$(orderNumber)) = 0 Then Exit Function
+    OrderBannerText = Fmt(UI_ORDER_BANNER, Trim$(orderNumber))
+    If o Is Nothing Then Exit Function
+
+    For Each part In Array(Trim$(o.Make), Trim$(o.Model), IIf(o.Year > 0, CStr(o.Year), ""))
+        If Len(part) > 0 Then vehicle = vehicle & IIf(Len(vehicle) > 0, " ", "") & part
+    Next part
+    plates = UCase$(Trim$(o.Plates))
+    If Len(vehicle) > 0 Then OrderBannerText = OrderBannerText & " · " & vehicle
+    If Len(plates) > 0 Then OrderBannerText = OrderBannerText & " · " & Fmt(UI_ORDER_BANNER_PLATES, plates)
+End Function
+
 '--- Libro ---------------------------------------------------------------------
 
 ' True si existe una hoja con ese nombre en este libro.

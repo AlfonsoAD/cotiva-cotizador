@@ -657,3 +657,11 @@ Public Function ListOrderStaff() As Variant
     Next i
     ListOrderStaff = names
 End Function
+
+'--- Orden a cotización ---------------------------------------------------------
+
+' Crea, guarda y liga una cotización nueva a la orden (que ya debe estar guardada).
+' Regresa el folio, o "" si algo falló.
+Public Function CreateQuoteForOrder(ByVal o As ServiceOrder) As String
+    CreateQuoteForOrder = ""
+End Function
