@@ -929,7 +929,7 @@ Public Sub DesignOrderTemplate(Optional ByVal silent As Boolean = False)
     ConfigurePage ws, fontName, ORDER_PRINT_AREA
 
     LockSheet ws
-    ws.Activate
+    Application.Goto ws.Range("A1")           ' Para apagar la cuadrícula de la ventana
     ActiveWindow.DisplayGridlines = False
     Application.ScreenUpdating = True
 
