@@ -118,7 +118,7 @@ Verificado tras T7 (sesión principal y humano):
 - [x] En Excel, la protección impide escribir a mano en `Plantilla` y `PlantillaOrden` fuera de las celdas editables; las `BD_*` no se ven.
 
 Pendiente tras T9 (reemplaza la revisión del diagnóstico de 1000 caracteres de arriba):
-- [ ] `build.ps1` compila sin diálogos con la nueva PlantillaOrden.
+- [x] `build.ps1` compila sin diálogos con la nueva PlantillaOrden (corrido por el implementer: genera dist/Cotiva-Cotizador.xlsm).
 - [ ] PDF de una orden con 40 renglones cortos: dos hojas, diagnóstico completo, "Página 1" y "Página 2", condiciones y firmas sin cortar.
 - [ ] PDF de una orden con diagnóstico de 1000 caracteres en pocos renglones y de una sin diagnóstico: una hoja, como antes.
 - [ ] En `frmOrder`, un diagnóstico de 41 renglones avisa en su pestaña y no se guarda.
