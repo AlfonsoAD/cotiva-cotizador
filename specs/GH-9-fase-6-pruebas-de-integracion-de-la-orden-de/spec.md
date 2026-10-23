@@ -86,6 +86,7 @@ Pendiente:
 - [ ] Orden nueva desde el formulario: guardar, cerrar y volver a cargarla por folio.
 - [ ] "Orden a cotización" abre la cotización con la franja de la orden; "ir a la orden" regresa.
 - [ ] Cotización vieja (sin orden) abre sin franja y su PDF no muestra renglón de vehículo.
+- Defecto corregido: un diagnóstico de 939 caracteres en 12 renglones solo mostraba 6.5 renglones (alto fijo de 96 pt); `A23` sube a 200 pt, con la prueba `Test_Integracion_DiagnosticoLargoCabeEnAlto`. Falta repetir el PDF con la corrección.
 - [ ] PDF de la orden con diagnóstico de 1000 caracteres: una hoja, texto completo visible.
 - [ ] PDF de la cotización ligada: una hoja, con vehículo.
 - [ ] En Excel, la protección impide escribir a mano en `Plantilla` y `PlantillaOrden` fuera de las celdas editables; las `BD_*` no se ven.

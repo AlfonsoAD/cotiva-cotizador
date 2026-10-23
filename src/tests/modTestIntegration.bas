@@ -108,6 +108,20 @@ Public Sub Test_Integracion_DiagnosticoLargoEnPlantilla()
     AssertEqual s, Replace(CStr(ThisWorkbook.Worksheets(SHEET_ORDER_TEMPLATE).Range(CELL_ORD_DIAGNOSIS).Value), vbCrLf, vbLf), "diagnostico completo"
 End Sub
 
+Public Sub Test_Integracion_DiagnosticoLargoCabeEnAlto()
+    Dim o As ServiceOrder, ws As Worksheet, s As String, i As Long
+    Do While Len(s) < 1000
+        i = i + 1
+        s = s & "Linea " & i & ": revisar sistema de frenos y suspension" & vbLf
+    Loop
+    Set o = NewSampleOrder("OS-0001")
+    o.Diagnosis = Left$(s, 1000)
+    FillOrderTemplate o
+    Set ws = ThisWorkbook.Worksheets(SHEET_ORDER_TEMPLATE)
+    ' 1000 caracteres en renglones de 10 pt ocupan unos 15 pt por renglon (13 renglones)
+    AssertTrue ws.Rows(23).RowHeight >= 13 * 15, "el bloque del diagnostico alcanza para 1000 caracteres"
+End Sub
+
 Public Sub Test_Integracion_HojasProtegidasTrasFlujo()
     Dim o As ServiceOrder, q As Quote, folio As String, n As Variant
     Set o = NewSampleOrder("OS-0001")

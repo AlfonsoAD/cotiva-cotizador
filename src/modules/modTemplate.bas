@@ -886,7 +886,7 @@ Public Sub DesignOrderTemplate(Optional ByVal silent As Boolean = False)
     AddOrderSection ws, 20, TPL_ORD_SEC_REQUESTED
     AddOrderTextBlock ws, 21, 48
     AddOrderSection ws, 22, TPL_ORD_SEC_DIAGNOSIS
-    AddOrderTextBlock ws, 23, 96
+    AddOrderTextBlock ws, 23, 200
     ws.Rows(24).RowHeight = 8
 
     ' --- 7. Condiciones (editables aunque la hoja esté protegida) ---
