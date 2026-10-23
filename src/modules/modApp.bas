@@ -19,6 +19,12 @@ Public Sub ShowQuoteForm()
     frmQuote.Show vbModeless
 End Sub
 
+' Abre frmQuote sin modal con la cotizacion guardada de ese folio.
+Public Sub ShowQuoteFormWith(ByVal quoteNumber As String)
+    frmQuote.OpenQuote quoteNumber
+    frmQuote.Show vbModeless
+End Sub
+
 ' Abre la orden de servicio sin modal, igual que ShowQuoteForm.
 Public Sub ShowOrderForm()
     frmOrder.Show vbModeless

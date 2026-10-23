@@ -56,6 +56,7 @@ Private WithEvents btnSwitch As MSForms.CommandButton
 Private WithEvents btnNew As MSForms.CommandButton
 Private WithEvents btnCompany As MSForms.CommandButton
 Private WithEvents btnSave As MSForms.CommandButton
+Private WithEvents btnToQuote As MSForms.CommandButton
 Private WithEvents lblInnobytes As MSForms.Label
 
 '--- Medidas del diseño (puntos) ---
@@ -144,6 +145,9 @@ Private Sub BuildLayout()
     cboStatus.Style = fmStyleDropDownList         ' Solo se puede elegir de la lista
     FillList cboStatus, ORDER_STATUSES
 
+    Set btnToQuote = AddButton(Me, "c_ToQuote", UI_BTN_ORDER_TO_QUOTE, kindSecondary, rightEdge - 130, 72, 130, 22)
+    btnToQuote.ControlTipText = TIP_ORDER_TO_QUOTE
+
     ' --- Pestañas ---
     Set mpgMain = Me.Controls.Add("Forms.MultiPage.1", "c_Pages", True)
     Place mpgMain, FORM_MARGIN, 102, FORM_WIDTH - 2 * FORM_MARGIN, 342
@@ -171,11 +175,12 @@ Private Sub BuildLayout()
     cboStatus.TabIndex = 0
     mpgMain.TabIndex = 1
     btnSave.TabIndex = 2
-    btnNew.TabIndex = 3
-    btnCompany.TabIndex = 4
-    cboHistory.TabIndex = 5
-    btnLoad.TabIndex = 6
-    btnSwitch.TabIndex = 7
+    btnToQuote.TabIndex = 3
+    btnNew.TabIndex = 4
+    btnCompany.TabIndex = 5
+    cboHistory.TabIndex = 6
+    btnLoad.TabIndex = 7
+    btnSwitch.TabIndex = 8
 End Sub
 
 ' Pestaña 0: cliente y vehículo.
@@ -781,6 +786,36 @@ Private Sub btnSwitch_Click()
     Exit Sub
 Fail:
     ShowError "btnSwitch_Click"
+End Sub
+
+' Guarda la orden y abre su cotizacion (la ligada, o una nueva con el diagnostico).
+Private Sub btnToQuote_Click()
+    Dim linked As String, quoteNumber As String, lineCount As Long
+    On Error GoTo Fail
+
+    If Not SaveCurrentOrder() Then Exit Sub
+
+    linked = UCase$(Trim$(mOrder.QuoteNumber))
+    If Len(linked) > 0 And QuoteExists(linked) Then
+        quoteNumber = linked
+    Else
+        If Len(linked) > 0 Then
+            MsgBox Fmt(MSG_LINKED_QUOTE_MISSING, linked), vbExclamation, TTL_REVIEW
+        End If
+        quoteNumber = CreateQuoteForOrder(mOrder)
+        If Len(quoteNumber) = 0 Then Exit Sub
+        lineCount = DiagnosisLines(mOrder.Diagnosis).Count
+        If lineCount > MAX_ITEMS Then
+            MsgBox Fmt(MSG_DIAGNOSIS_TRUNCATED, lineCount, MAX_ITEMS), vbInformation
+        End If
+    End If
+
+    mIsDirty = False                              ' Para que QueryClose no pregunte
+    ShowQuoteFormWith quoteNumber
+    Unload Me
+    Exit Sub
+Fail:
+    ShowError "btnToQuote_Click"
 End Sub
 
 Private Sub btnCompany_Click()

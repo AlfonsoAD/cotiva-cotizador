@@ -657,3 +657,37 @@ Public Function ListOrderStaff() As Variant
     Next i
     ListOrderStaff = names
 End Function
+
+'--- Orden a cotización ---------------------------------------------------------
+
+' Crea, guarda y liga una cotización nueva a la orden (que ya debe estar guardada).
+' Regresa el folio, o "" si algo falló.
+Public Function CreateQuoteForOrder(ByVal o As ServiceOrder) As String
+    Dim q As Quote
+    Dim previous As String
+
+    CreateQuoteForOrder = ""
+    If o Is Nothing Then Exit Function
+
+    Set q = QuoteFromOrder(o, GetNextQuoteNumber())
+    If Not SaveQuote(q) Then
+        DeleteQuote q.Number
+        Exit Function
+    End If
+
+    previous = o.QuoteNumber
+    o.QuoteNumber = q.Number
+    If Not SaveOrder(o) Then
+        o.QuoteNumber = previous
+        DeleteQuote q.Number
+        Exit Function
+    End If
+    CreateQuoteForOrder = q.Number
+End Function
+
+' Deshace una cotizacion a medio crear (encabezado y conceptos).
+Private Sub DeleteQuote(ByVal quoteNumber As String)
+    On Error Resume Next
+    DeleteRowsByNumber ThisWorkbook.Worksheets(SHEET_QUOTES), quoteNumber
+    DeleteRowsByNumber ThisWorkbook.Worksheets(SHEET_ITEMS), quoteNumber
+End Sub

@@ -30,6 +30,7 @@ Private lblSubtotal As MSForms.Label
 Private lblTax As MSForms.Label
 Private lblTotal As MSForms.Label
 Private lblValidUntil As MSForms.Label
+Private lblOrderBanner As MSForms.Label
 
 '--- Controles con eventos (WithEvents permite recibir sus eventos) ---
 Private WithEvents cboClient As MSForms.ComboBox
@@ -124,6 +125,8 @@ Private Sub BuildLayout()
 
     ' --- Sección 1: datos de la cotización ---
     AddLabel Me, "c_Sec1", UI_SECTION_QUOTE, MARGIN, 62, 300, 12, 8, True, mPrimary
+    Set lblOrderBanner = AddLabel(Me, "c_OrderBanner", "", 330, 61, 312, 14, 8, True, mSecondary, fmTextAlignRight)
+    lblOrderBanner.Visible = False
     AddLabel Me, "c_LNumber", UI_LBL_NUMBER, MARGIN, 80, 90, 12, 8, False, TextGray()
     AddLabel Me, "c_LClient", UI_LBL_CLIENT, 116, 80, 250, 12, 8, False, TextGray()
     AddLabel Me, "c_LDate", UI_LBL_DATE, 524, 80, 118, 12, 8, False, TextGray()
@@ -273,9 +276,21 @@ Private Sub StartNewQuote()
     RefreshItems
     UpdateValidUntil
 
+    RefreshOrderBanner
+
     mSuppressEvents = False
     mIsDirty = False
     FocusOn cboClient
+End Sub
+
+' La franja solo se ve cuando la cotizacion viene de una orden.
+Private Sub RefreshOrderBanner()
+    If Len(Trim$(mQuote.OrderNumber)) = 0 Then
+        lblOrderBanner.Visible = False
+    Else
+        lblOrderBanner.Caption = OrderBannerText(mQuote.OrderNumber, LoadOrder(mQuote.OrderNumber))
+        lblOrderBanner.Visible = True
+    End If
 End Sub
 
 ' Cambio hecho por el usuario (no por el código).
@@ -728,7 +743,7 @@ Private Sub LoadClientList()
 End Sub
 
 Private Sub btnLoad_Click()
-    Dim quoteNumber As String, loaded As Quote
+    Dim quoteNumber As String
     On Error GoTo Fail
 
     quoteNumber = UCase$(Trim$(cboHistory.Text))
@@ -737,14 +752,25 @@ Private Sub btnLoad_Click()
         Exit Sub
     End If
 
+    ShowSavedQuote quoteNumber
+    Exit Sub
+Fail:
+    mSuppressEvents = False
+    ShowError "btnLoad_Click"
+End Sub
+
+' Muestra una cotizacion guardada. Regresa True si la cargo.
+Private Function ShowSavedQuote(ByVal quoteNumber As String) As Boolean
+    Dim loaded As Quote
+
     Set loaded = LoadQuote(quoteNumber)
     If loaded Is Nothing Then
         MsgBox Fmt(MSG_QUOTE_NOT_FOUND, quoteNumber), vbExclamation, TTL_REVIEW
-        Exit Sub
+        Exit Function
     End If
 
     If mIsDirty Then
-        If MsgBox(Fmt(MSG_UNSAVED_LOAD, quoteNumber), vbYesNo + vbExclamation, TTL_REVIEW) = vbNo Then Exit Sub
+        If MsgBox(Fmt(MSG_UNSAVED_LOAD, quoteNumber), vbYesNo + vbExclamation, TTL_REVIEW) = vbNo Then Exit Function
     End If
 
     mSuppressEvents = True                        ' Llenar campos desde la BD no es un cambio
@@ -757,16 +783,25 @@ Private Sub btnLoad_Click()
     cboTax.ListIndex = TaxOptionOf(mQuote.TaxRate)
     RefreshItems
     FillTemplate mQuote
+    RefreshOrderBanner
     mSuppressEvents = False
 
     mIsSaved = True
-    mOverwriteConfirmed = False                   ' Preguntará una vez antes de sobrescribir
+    mOverwriteConfirmed = False                   ' Preguntara una vez antes de sobrescribir
     mIsDirty = False
-    Exit Sub
+    ShowSavedQuote = True
+End Function
+
+' Abre una cotizacion ya guardada (por ejemplo, la recien creada desde una orden).
+Public Function OpenQuote(ByVal quoteNumber As String) As Boolean
+    On Error GoTo Fail
+    LoadHistoryList                               ' La cotizacion nueva aun no esta en el combo
+    OpenQuote = ShowSavedQuote(UCase$(Trim$(quoteNumber)))
+    Exit Function
 Fail:
     mSuppressEvents = False
-    ShowError "btnLoad_Click"
-End Sub
+    ShowError "OpenQuote"
+End Function
 
 ' Enter en el buscador = Cargar.
 Private Sub cboHistory_KeyDown(ByVal KeyCode As MSForms.ReturnInteger, ByVal Shift As Integer)

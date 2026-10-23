@@ -54,6 +54,7 @@ Public Const DEFAULT_TAX_OPTION As Long = 0            ' Tasa con la que arranca
 Public Const FIRST_ITEM_ROW As Long = 9
 Public Const LAST_ITEM_ROW As Long = 25
 Public Const MAX_ITEMS As Long = LAST_ITEM_ROW - FIRST_ITEM_ROW + 1   ' = 17 conceptos
+Public Const MAX_ITEM_DESCRIPTION As Long = 255      ' Largo máximo de la descripción de un concepto
 Public Const MIN_VISIBLE_ITEM_ROWS As Long = 8          ' Filas visibles aunque haya menos conceptos
 Public Const MIN_ITEM_ROW_HEIGHT As Double = 20         ' Alto mínimo de cada fila de concepto
 Public Const PRINT_AREA As String = "$A$1:$D$34"
