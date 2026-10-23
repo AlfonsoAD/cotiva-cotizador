@@ -98,12 +98,28 @@ Private Function AddSheet(ByVal sheetName As String) As Worksheet
     Set AddSheet = ws
 End Function
 
-' Abre el catalogo de clientes desde Inicio (contrato; lo completa T4).
+' Macro del boton "Clientes" de Inicio: prepara el libro y abre el catalogo.
 Public Sub OpenClientsTool()
+    If Not PrepareWorkbook() Then Exit Sub
+    PickClient vbNullString, False
 End Sub
 
-' Abre frmClients modal y regresa el cliente elegido, o "" si no eligio (contrato; lo completa T4).
+' Abre frmClients modal y regresa el cliente elegido, o "" si no eligio.
+' Con pickMode muestra "Usar este cliente"; currentClient es el que se muestra al abrir.
 Public Function PickClient(ByVal currentClient As String, _
         Optional ByVal pickMode As Boolean = True) As String
-    PickClient = vbNullString
+    Dim chosen As String
+
+    On Error GoTo Fail
+    frmClients.Start currentClient, pickMode
+    frmClients.Show vbModal
+    chosen = frmClients.ChosenClient              ' Se lee antes de descargar el formulario
+    PickClient = chosen
+Cleanup:
+    On Error Resume Next
+    Unload frmClients
+    Exit Function
+Fail:
+    ShowError "PickClient"
+    Resume Cleanup
 End Function

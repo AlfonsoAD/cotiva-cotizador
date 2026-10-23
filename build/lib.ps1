@@ -73,7 +73,7 @@ function Import-CotizadorCode {
     [void]$vbp.VBComponents.Import((Join-Path $Src 'build\modBuild.bas'))
 
     $encoding = [System.Text.Encoding]::GetEncoding(1252)
-    foreach ($formName in @('frmQuote', 'frmOrder')) {
+    foreach ($formName in @('frmQuote', 'frmOrder', 'frmClients')) {
         Write-Host "Creando formulario $formName..."
         $form = $vbp.VBComponents.Add(3)      # 3 = vbext_ct_MSForm
         $form.Name = $formName
