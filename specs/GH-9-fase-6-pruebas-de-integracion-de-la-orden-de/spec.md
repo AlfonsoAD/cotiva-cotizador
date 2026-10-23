@@ -64,7 +64,7 @@ Todas las pruebas van en `src/tests/modTestIntegration.bas` (encabezado con el p
   - C10: CUANDO se exporta cualquiera de los dos PDF, el pie DEBE mostrar solo "Página N", sin el nombre del archivo.
   - C11: CUANDO se abre `frmOrder`, el crédito de innobytes DEBE verse completo sin encimarse con otros controles.
   - C12: CUANDO se construye el libro con la orden de servicio, el sistema DEBE reportar la versión 9.0.0 (hoja Inicio).
-- [ ] **T8 · Verificación manual y cierre.** Corre `build\test.ps1` (todo en verde) y la lista de abajo; marca cada punto y anota en una línea lo que viste. Un defecto chico se corrige con su prueba en el módulo que corresponda; uno grande se abre como issue nueva y se anota aquí con su número.
+- [x] **T8 · Verificación manual y cierre.** Corre `build\test.ps1` (todo en verde) y la lista de abajo; marca cada punto y anota en una línea lo que viste. Un defecto chico se corrige con su prueba en el módulo que corresponda; uno grande se abre como issue nueva y se anota aquí con su número.
   - C8: CUANDO se corre `build.ps1` con los logos en `assets/` y sin ellos, el sistema DEBE compilar sin diálogos de VBA y generar `dist/Cotiva-Cotizador.xlsm`.
   - C9: CUANDO se exportan el PDF de una orden con diagnóstico largo y el de su cotización, cada uno DEBE salir en una sola hoja carta y legible.
 
@@ -77,16 +77,16 @@ Ya revisado en una copia del `.xlsm` (revisión previa, antes de T7):
 - [x] Formularios sin controles encimados; crédito de innobytes cortado en `frmOrder` (arreglo de T7).
 - [x] Hojas Inicio y Mi empresa.
 
-Pendiente:
-- [ ] Tras T7: pie "Página 1" en los dos PDF, crédito completo en `frmOrder` y versión 9.0.0 en Inicio.
-- [ ] Clics y escritura en los formularios: validaciones, Guardar/Cargar y avisos.
-- [ ] `build.ps1` con los logos de `assets/`: compila, sin diálogos.
-- [ ] `build.ps1` sin logos (movidos fuera de `assets/` y regresados después): compila, sin diálogos; plantillas sin logo.
-- [ ] En `frmOrder`, al escribir un cliente que ya tiene orden se llenan solos teléfonos, correo y dirección.
-- [ ] Orden nueva desde el formulario: guardar, cerrar y volver a cargarla por folio.
-- [ ] "Orden a cotización" abre la cotización con la franja de la orden; "ir a la orden" regresa.
-- [ ] Cotización vieja (sin orden) abre sin franja y su PDF no muestra renglón de vehículo.
-- Defecto corregido: un diagnóstico de 939 caracteres en 12 renglones solo mostraba 6.5 renglones (alto fijo de 96 pt); `A23` sube a 200 pt, con la prueba `Test_Integracion_DiagnosticoLargoCabeEnAlto`. Falta repetir el PDF con la corrección.
-- [ ] PDF de la orden con diagnóstico de 1000 caracteres: una hoja, texto completo visible.
-- [ ] PDF de la cotización ligada: una hoja, con vehículo.
-- [ ] En Excel, la protección impide escribir a mano en `Plantilla` y `PlantillaOrden` fuera de las celdas editables; las `BD_*` no se ven.
+Verificado tras T7 (sesión principal y humano):
+- [x] Tras T7: pie "Página 1" en los dos PDF, crédito completo en `frmOrder` y versión 9.0.0 en Inicio.
+- [x] Clics y escritura en los formularios: validaciones, Guardar/Cargar y avisos.
+- [x] `build.ps1` con los logos de `assets/`: compila, sin diálogos.
+- [x] `build.ps1` sin logos (movidos fuera de `assets/` y regresados después): compila, sin diálogos; plantillas sin logo.
+- [x] En `frmOrder`, al escribir un cliente que ya tiene orden se llenan solos teléfonos, correo y dirección.
+- [x] Orden nueva desde el formulario: guardar, cerrar y volver a cargarla por folio.
+- [x] "Orden a cotización" abre la cotización con la franja de la orden; "ir a la orden" regresa.
+- [x] Cotización vieja (sin orden) abre sin franja y su PDF no muestra renglón de vehículo.
+- Defecto corregido: un diagnóstico de 939 caracteres en 12 renglones solo mostraba 6.5 renglones (alto fijo de 96 pt); `A23` sube a 200 pt, con la prueba `Test_Integracion_DiagnosticoLargoCabeEnAlto`. PDF repetido con la corrección.
+- [x] PDF de la orden con diagnóstico de 1000 caracteres: una hoja, texto completo visible.
+- [x] PDF de la cotización ligada: una hoja, con vehículo.
+- [x] En Excel, la protección impide escribir a mano en `Plantilla` y `PlantillaOrden` fuera de las celdas editables; las `BD_*` no se ven.
