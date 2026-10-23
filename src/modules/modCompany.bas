@@ -152,6 +152,8 @@ Private Sub DesignCompanySheet(ByVal ws As Worksheet)
     Next i
 
     ' Valores iniciales solo si la celda está vacía (no pisa lo capturado)
+    SetIfEmpty ws.Range(COMPANY_NAME_CELL), DEFAULT_COMPANY_NAME
+    SetIfEmpty ws.Range(COMPANY_PHONE_CELL), DEFAULT_COMPANY_PHONE
     SetIfEmpty ws.Range(COMPANY_VALIDITY_CELL), DEFAULT_VALIDITY_DAYS
     SetIfEmpty ws.Range(COMPANY_PRIMARY_COLOR_CELL), DEFAULT_PRIMARY_HEX
     SetIfEmpty ws.Range(COMPANY_SECONDARY_COLOR_CELL), DEFAULT_SECONDARY_HEX

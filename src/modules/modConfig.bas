@@ -151,8 +151,10 @@ Public Const COMPANY_SECONDARY_COLOR_CELL As String = "B12"
 
 ' --- Valores por defecto ---
 Public Const DEFAULT_VALIDITY_DAYS As Long = 15
-Public Const DEFAULT_PRIMARY_HEX As String = "#CF4A06"        ' Naranja Cotiva
-Public Const DEFAULT_SECONDARY_HEX As String = "#1A2638"      ' Azul tinta Cotiva
+Public Const DEFAULT_PRIMARY_HEX As String = "#111111"        ' Negro Alatorre
+Public Const DEFAULT_SECONDARY_HEX As String = "#4D4D4D"      ' Gris Alatorre
+Public Const DEFAULT_COMPANY_NAME As String = "TALLER ALATORRE"
+Public Const DEFAULT_COMPANY_PHONE As String = "+52 867 342 3238"
 
 ' --- Comportamiento ---
 Public Const PDF_FOLDER As String = "Cotizaciones_PDF"        ' Subcarpeta para los PDF
