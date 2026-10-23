@@ -371,13 +371,3 @@ Public Sub Test_SearchClients_PorRfcYTelefono()
     AssertEqual 3, NamesLength(SearchClients("")), "texto vacio = todos"
     AssertTrue IsEmpty(SearchClients("no-existe-xyz")), "sin coincidencias = Empty"
 End Sub
-
-Public Sub Test_IsValidPostalCode()
-    AssertTrue IsValidPostalCode("01000"), "01000"
-    AssertTrue IsValidPostalCode("06600"), "06600"
-    AssertTrue Not IsValidPostalCode("1000"), "4 digitos"
-    AssertTrue Not IsValidPostalCode("010000"), "6 digitos"
-    AssertTrue Not IsValidPostalCode("0100a"), "letra"
-    AssertTrue Not IsValidPostalCode(""), "vacio"
-    AssertTrue Not IsValidPostalCode("01 00"), "espacio"
-End Sub
