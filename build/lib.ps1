@@ -72,14 +72,16 @@ function Import-CotizadorCode {
     Write-Host "Importando modulo de build..."
     [void]$vbp.VBComponents.Import((Join-Path $Src 'build\modBuild.bas'))
 
-    Write-Host "Creando formulario frmQuote..."
-    $form = $vbp.VBComponents.Add(3)          # 3 = vbext_ct_MSForm
-    $form.Name = 'frmQuote'
     $encoding = [System.Text.Encoding]::GetEncoding(1252)
-    $formCode = [System.IO.File]::ReadAllText((Join-Path $Src 'forms\frmQuote.vba'), $encoding)
-    $module = $form.CodeModule
-    if ($module.CountOfLines -gt 0) { $module.DeleteLines(1, $module.CountOfLines) }
-    $module.AddFromString($formCode)
+    foreach ($formName in @('frmQuote', 'frmOrder')) {
+        Write-Host "Creando formulario $formName..."
+        $form = $vbp.VBComponents.Add(3)      # 3 = vbext_ct_MSForm
+        $form.Name = $formName
+        $formCode = [System.IO.File]::ReadAllText((Join-Path $Src "forms\$formName.vba"), $encoding)
+        $module = $form.CodeModule
+        if ($module.CountOfLines -gt 0) { $module.DeleteLines(1, $module.CountOfLines) }
+        $module.AddFromString($formCode)
+    }
 
     if ($IncludeTests) {
         Write-Host "Importando pruebas..."

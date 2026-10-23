@@ -40,6 +40,7 @@ Private WithEvents lstItems As MSForms.ListBox
 Private WithEvents cboTax As MSForms.ComboBox
 Private WithEvents cboHistory As MSForms.ComboBox
 Private WithEvents btnLoad As MSForms.CommandButton
+Private WithEvents btnSwitch As MSForms.CommandButton
 Private WithEvents btnAdd As MSForms.CommandButton
 Private WithEvents btnEdit As MSForms.CommandButton
 Private WithEvents btnDelete As MSForms.CommandButton
@@ -100,10 +101,12 @@ Private Sub BuildLayout()
         AddBand Me, "c_Bar", 0, 0, FORM_WIDTH, 48, vbWhite, True
         AddBand Me, "c_BarLine", 0, 48, FORM_WIDTH, 2, mPrimary, False
         AddLabel Me, "c_Module", UI_MODULE, 142, 17, 120, 18, 11, True, TextGray()
+        Set btnSwitch = AddButton(Me, "c_Switch", UI_BTN_TO_ORDER, kindSecondary, 268, 13, 100, 22)
     Else
         AddBand Me, "c_Bar", 0, 0, FORM_WIDTH, 48, mSecondary, True
         AddLabel Me, "c_Brand", UI_BRAND, MARGIN, 12, 80, 24, 16, True, ContrastTextColor(mSecondary)
         AddLabel Me, "c_Module", UI_MODULE, 104, 17, 120, 18, 11, False, BrandInkLight()
+        Set btnSwitch = AddButton(Me, "c_Switch", UI_BTN_TO_ORDER, kindSecondary, 230, 13, 100, 22)
     End If
 
     Set cboHistory = AddComboBox(Me, "c_History", rightEdge - 72 - 6 - 190, 13, 190, 22)
@@ -242,6 +245,7 @@ Private Sub BuildLayout()
     btnNew.TabIndex = 13
     cboHistory.TabIndex = 14
     btnLoad.TabIndex = 15
+    btnSwitch.TabIndex = 16
 End Sub
 
 '==============================================================================
@@ -656,6 +660,20 @@ Private Sub btnNew_Click()
     Exit Sub
 Fail:
     ShowError "btnNew_Click"
+End Sub
+
+' Va a la orden de servicio; si hay cambios, pregunta antes.
+Private Sub btnSwitch_Click()
+    On Error GoTo Fail
+    If mIsDirty Then
+        If MsgBox(Fmt(MSG_UNSAVED_SWITCH, UI_ORD_SWITCH_TARGET), vbYesNo + vbExclamation, TTL_REVIEW) = vbNo Then Exit Sub
+    End If
+    mIsDirty = False                              ' Para que QueryClose no vuelva a preguntar
+    ShowOrderForm
+    Unload Me
+    Exit Sub
+Fail:
+    ShowError "btnSwitch_Click"
 End Sub
 
 Private Sub btnLogo_Click()

@@ -35,7 +35,8 @@ Public Sub BuildWorkbook(ByVal assetsFolder As String)
     ImportLogo assetsFolder, "logo-innobytes.png", HOME_INNOBYTES_LOGO_NAME, True
 
     If Len(Dir$(assetsFolder & "\" & FORM_LOGO_FILE)) > 0 Then
-        AddFormLogo assetsFolder & "\" & FORM_LOGO_FILE
+        AddFormLogo "frmQuote", assetsFolder & "\" & FORM_LOGO_FILE
+        AddFormLogo "frmOrder", assetsFolder & "\" & FORM_LOGO_FILE
     End If
 
     ' 4) Portada
@@ -67,11 +68,11 @@ End Sub
 ' La imagen queda guardada dentro del archivo. Debe ser JPG, BMP o GIF
 ' (los formularios de VBA no aceptan PNG). Requiere acceso al modelo de
 ' objetos de VBA (build.ps1 lo activa).
-Private Sub AddFormLogo(ByVal imagePath As String)
+Private Sub AddFormLogo(ByVal formName As String, ByVal imagePath As String)
     Dim formDesigner As Object, img As Object
 
     On Error GoTo Fail
-    Set formDesigner = ThisWorkbook.VBProject.VBComponents("frmQuote").Designer
+    Set formDesigner = ThisWorkbook.VBProject.VBComponents(formName).Designer
     Set img = formDesigner.Controls.Add("Forms.Image.1", "imgLogo")
     img.Picture = LoadPicture(imagePath)
     img.AutoSize = False

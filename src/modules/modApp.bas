@@ -19,6 +19,10 @@ Public Sub ShowQuoteForm()
     frmQuote.Show vbModeless
 End Sub
 
+Public Sub ShowOrderForm()
+    frmOrder.Show vbModeless
+End Sub
+
 ' Deja el libro listo para trabajar. Regresa False si algo impide abrir el cotizador.
 Public Function PrepareWorkbook() As Boolean
     On Error GoTo Fail

@@ -38,7 +38,7 @@ description: "Reglas de arquitectura, maquetado y clean code para el cotizador E
 - Sin código muerto ni `Debug.Print` olvidados. Comenta el porqué, no el qué.
 
 ## Maquetado de formularios
-- Los formularios se construyen por código con los helpers `Place`, `AddTextBox`, `AddLabel`, `AddButton`; nada arrastrado en el diseñador.
+- Los formularios se construyen por código con los helpers públicos de `modFormKit` (`BeginFormKit` al inicio de `BuildLayout`, `Place`, `AddTextBox`, `AddLabel`, `AddButton`, `AddBand`; reciben el formulario o la pestaña como `parent`); nunca se copian como privados dentro de un formulario; nada arrastrado en el diseñador.
 - Rejilla: margen 18 pt, controles de 22 pt de alto, etiqueta de 8 pt en `TextGray()` arriba de cada campo, título de sección en mayúsculas, 8 pt, negritas y color de marca.
 - Un solo botón primario por vista. Define el `TabIndex` en el orden de captura.
 - Revisa que la ventana quepa en 1366×768; si no, usa `MultiPage`.
