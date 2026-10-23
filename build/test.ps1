@@ -81,7 +81,7 @@ if ($Worker) {
                 $failure = "FALLA ${name}: error {0:X8}: {1}" -f [int]$com.HResult, $com.Message
             }
             $recorded = [string]$excel.Run($book + "modTestRunner.EndTest")
-            if ($recorded -or $failure) { $failureLines.Add("--- FAIL: " + ($name -replace ".*.", "")) }
+            if ($recorded -or $failure) { $failureLines.Add("--- FAIL: " + ($name -replace '^[^.]*[.]', '')) }
             if ($recorded) { $failureLines.Add($recorded) }
             if ($failure) { $failureLines.Add($failure) }
             if ($recorded -or $failure) { $failed++ } else { $passed++ }
