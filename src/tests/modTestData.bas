@@ -203,7 +203,8 @@ End Sub
 
 Public Sub Test_CreateQuoteForOrder_DiagnosticoVacio()
     Dim o As ServiceOrder, q As Quote
-    Set o = OrderWithDiagnosis("")
+    Set o = NewSampleOrder("OS-0001")
+    o.Diagnosis = ""
     o.QuoteNumber = ""
     AssertTrue SaveOrder(o), "SaveOrder"
     AssertEqual "COT-1001", CreateQuoteForOrder(o), "folio creado"
