@@ -623,5 +623,37 @@ End Function
 
 ' Nombres distintos de Recibio/Entrego en BD_Ordenes, orden alfabetico; Empty si no hay.
 Public Function ListOrderStaff() As Variant
-    ListOrderStaff = Empty   ' Stub del contrato
+    Dim data As Variant, i As Long, j As Long, c As Long, n As Long, found As Boolean
+    Dim names() As String, name As String, tmp As String
+
+    data = ReadData(ThisWorkbook.Worksheets(SHEET_ORDERS), ORDER_COLUMNS)
+    If IsEmpty(data) Then Exit Function
+
+    ReDim names(0 To UBound(data, 1) * 2)
+    For i = 1 To UBound(data, 1)
+        For c = 19 To 23 Step 4                   ' Recibio y Entrego
+            name = Trim$(CStr(data(i, c)))
+            If Len(name) > 0 Then
+                found = False
+                For j = 0 To n - 1
+                    If StrComp(names(j), name, vbTextCompare) = 0 Then found = True: Exit For
+                Next j
+                If Not found Then
+                    names(n) = name
+                    n = n + 1
+                End If
+            End If
+        Next c
+    Next i
+    If n = 0 Then Exit Function
+
+    ReDim Preserve names(0 To n - 1)
+    For i = 0 To n - 2                            ' Ordenar (listas cortas)
+        For j = i + 1 To n - 1
+            If StrComp(names(j), names(i), vbTextCompare) < 0 Then
+                tmp = names(i): names(i) = names(j): names(j) = tmp
+            End If
+        Next j
+    Next i
+    ListOrderStaff = names
 End Function

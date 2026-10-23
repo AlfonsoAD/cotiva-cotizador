@@ -314,21 +314,52 @@ End Function
 '--- Validacion de campos ------------------------------------------------------
 
 Public Function IsValidDate(ByVal dateText As String) As Boolean
-    IsValidDate = False   ' Stub del contrato
+    dateText = Trim$(dateText)
+    IsValidDate = (Len(dateText) > 0 And IsDate(dateText))
 End Function
 
+' "H:MM" o "HH:MM", de 00:00 a 23:59.
 Public Function IsValidTime(ByVal timeText As String) As Boolean
-    IsValidTime = False   ' Stub del contrato
+    Dim p As Long, hh As String, mm As String
+    timeText = Trim$(timeText)
+    p = InStr(timeText, ":")
+    If p < 2 Then Exit Function
+    hh = Left$(timeText, p - 1)
+    mm = Mid$(timeText, p + 1)
+    If Len(hh) > 2 Or Len(mm) <> 2 Then Exit Function
+    If Not (hh Like "#" Or hh Like "##") Then Exit Function
+    If Not mm Like "##" Then Exit Function
+    IsValidTime = (CLng(hh) <= 23 And CLng(mm) <= 59)
 End Function
 
+' 4 digitos entre MIN_VEHICLE_YEAR y el ano de referencia + 1.
 Public Function IsValidVehicleYear(ByVal yearText As String, Optional ByVal referenceDate As Date = 0) As Boolean
-    IsValidVehicleYear = False   ' Stub del contrato
+    Dim y As Long
+    yearText = Trim$(yearText)
+    If Not yearText Like "####" Then Exit Function
+    If referenceDate = 0 Then referenceDate = Date
+    y = CLng(yearText)
+    IsValidVehicleYear = (y >= MIN_VEHICLE_YEAR And y <= Year(referenceDate) + 1)
 End Function
 
+' De 1 a 9 digitos, sin separadores.
 Public Function IsValidMileage(ByVal mileageText As String) As Boolean
-    IsValidMileage = False   ' Stub del contrato
+    Dim i As Long
+    mileageText = Trim$(mileageText)
+    If Len(mileageText) < 1 Or Len(mileageText) > 9 Then Exit Function
+    For i = 1 To Len(mileageText)
+        If Not Mid$(mileageText, i, 1) Like "[0-9]" Then Exit Function
+    Next i
+    IsValidMileage = True
 End Function
 
+' 17 caracteres alfanumericos, sin importar mayusculas.
 Public Function IsValidVin(ByVal vinText As String) As Boolean
-    IsValidVin = False   ' Stub del contrato
+    Dim i As Long
+    vinText = Trim$(vinText)
+    If Len(vinText) <> 17 Then Exit Function
+    For i = 1 To 17
+        If Not Mid$(vinText, i, 1) Like "[A-Za-z0-9]" Then Exit Function
+    Next i
+    IsValidVin = True
 End Function
