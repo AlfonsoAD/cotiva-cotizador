@@ -7,18 +7,21 @@ Attribute VB_Name = "modFormKit"
 '==============================================================================
 Option Explicit
 
+' Estilo de botón: color principal (acción principal), tinta o secundario. Los colores vienen de «Mi empresa».
 Public Enum ButtonKind
     kindPrimary = 0         ' Naranja: acción principal
     kindDark = 1            ' Tinta
     kindSecondary = 2       ' Blanco
 End Enum
 
+' Margen interior de los formularios, en puntos.
 Public Const FORM_MARGIN As Single = 18
 
 Private mKitFont As String
 Private mKitPrimary As Long
 Private mKitSecondary As Long
 
+' Fija la fuente y los colores que usan los controles siguientes. Llamarla una vez por BuildLayout.
 Public Sub BeginFormKit(ByVal fontName As String, ByVal primaryColor As Long, ByVal secondaryColor As Long)
     mKitFont = fontName
     mKitPrimary = primaryColor
@@ -82,6 +85,7 @@ Public Sub StyleInput(ByVal ctl As Object)
     ctl.Font.Size = 10
 End Sub
 
+' Crea una caja de texto dentro de parent (formulario o pestaña) con el estilo de la app.
 Public Function AddTextBox(ByVal parent As Object, ByVal ctlName As String, ByVal x As Single, ByVal y As Single, _
                             ByVal w As Single, ByVal h As Single) As MSForms.TextBox
     Dim ctl As MSForms.TextBox
@@ -91,6 +95,7 @@ Public Function AddTextBox(ByVal parent As Object, ByVal ctlName As String, ByVa
     Set AddTextBox = ctl
 End Function
 
+' Crea una lista desplegable dentro de parent con el estilo de la app.
 Public Function AddComboBox(ByVal parent As Object, ByVal ctlName As String, ByVal x As Single, ByVal y As Single, _
                              ByVal w As Single, ByVal h As Single) As MSForms.ComboBox
     Dim ctl As MSForms.ComboBox
@@ -100,6 +105,7 @@ Public Function AddComboBox(ByVal parent As Object, ByVal ctlName As String, ByV
     Set AddComboBox = ctl
 End Function
 
+' Crea un botón dentro de parent. kind elige el color; el texto se lee sobre el fondo.
 Public Function AddButton(ByVal parent As Object, ByVal ctlName As String, ByVal buttonText As String, ByVal kind As ButtonKind, _
                            ByVal x As Single, ByVal y As Single, _
                            ByVal w As Single, ByVal h As Single) As MSForms.CommandButton
@@ -159,6 +165,7 @@ Public Sub AddBand(ByVal parent As Object, ByVal ctlName As String, ByVal x As S
 End Sub
 
 
+' Pone el cursor en el control. No falla si el formulario todavía no es visible.
 Public Sub FocusOn(ByVal ctl As Object)
     On Error Resume Next                          ' Falla si el formulario aún no es visible
     ctl.SetFocus

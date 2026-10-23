@@ -19,6 +19,7 @@ Public Sub ShowQuoteForm()
     frmQuote.Show vbModeless
 End Sub
 
+' Abre la orden de servicio sin modal, igual que ShowQuoteForm.
 Public Sub ShowOrderForm()
     frmOrder.Show vbModeless
 End Sub
