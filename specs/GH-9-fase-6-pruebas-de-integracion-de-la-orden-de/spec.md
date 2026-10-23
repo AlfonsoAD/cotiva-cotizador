@@ -114,6 +114,9 @@ Verificado tras T7 (sesión principal y humano):
 - [x] Cotización vieja (sin orden) abre sin franja y su PDF no muestra renglón de vehículo.
 - Defecto corregido: un diagnóstico de 939 caracteres en 12 renglones solo mostraba 6.5 renglones (alto fijo de 96 pt); `A23` sube a 200 pt, con la prueba `Test_Integracion_DiagnosticoLargoCabeEnAlto`. PDF repetido con la corrección.
 - [x] PDF de la orden con diagnóstico de 1000 caracteres: una hoja, texto completo visible.
+- [x] (PDF generados desde dist/ por la sesión principal) Orden con 40 renglones cortos: 2 hojas completa, "Página 1" y "Página 2"; con 1000 caracteres: 1 hoja; sin diagnóstico: 1 hoja; cotización ligada: 1 hoja con vehículo.
+- Defectos corregidos: hueco tras el renglón 5 (el mínimo de 96 pt solo aplica con una fila de diagnóstico) e interlineado apretado entre filas (cada fila medida suma `ORD_DIAG_ROW_PAD` = 6 pt). PDF por repetir.
+- [ ] Aviso de `frmOrder` con 41 renglones: pendiente del humano.
 - [x] PDF de la cotización ligada: una hoja, con vehículo.
 - [x] En Excel, la protección impide escribir a mano en `Plantilla` y `PlantillaOrden` fuera de las celdas editables; las `BD_*` no se ven.
 

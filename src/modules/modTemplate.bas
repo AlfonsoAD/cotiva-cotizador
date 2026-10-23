@@ -710,14 +710,14 @@ Private Sub FillOrderDiagnosis(ByVal ws As Worksheet, ByVal diagnosisText As Str
             ws.Range("A" & r).Value = chunk
             ws.Range(ORD_MEASURE_COLUMN & r).Value = chunk
             ws.Rows(r).AutoFit
-            fitted = ws.Rows(r).RowHeight
+            fitted = ws.Rows(r).RowHeight + ORD_DIAG_ROW_PAD
             ws.Range(ORD_MEASURE_COLUMN & r).ClearContents
             ws.Rows(r).RowHeight = fitted           ' Si no, la fila se reajusta al vaciar la medición
         ElseIf i > 1 Then
             ws.Rows(r).Hidden = True
         End If
     Next i
-    If ws.Rows(ORD_DIAG_FIRST_ROW).RowHeight < ORD_DIAG_MIN_HEIGHT Then ws.Rows(ORD_DIAG_FIRST_ROW).RowHeight = ORD_DIAG_MIN_HEIGHT
+    If chunks.Count <= 1 And ws.Rows(ORD_DIAG_FIRST_ROW).RowHeight < ORD_DIAG_MIN_HEIGHT Then ws.Rows(ORD_DIAG_FIRST_ROW).RowHeight = ORD_DIAG_MIN_HEIGHT
 End Sub
 
 ' Pinta la PlantillaOrden con el color principal de la empresa (título y línea).

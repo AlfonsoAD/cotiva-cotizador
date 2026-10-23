@@ -113,6 +113,8 @@ Public Const ORD_DIAG_ROWS As Long = 8
 Public Const ORD_DIAG_LINES_PER_ROW As Long = 5
 Public Const ORD_DIAG_MAX_LINES As Long = ORD_DIAG_ROWS * ORD_DIAG_LINES_PER_ROW
 Public Const ORD_DIAG_MIN_HEIGHT As Double = 96
+' Margen sobre el alto medido: AutoFit mide en pantalla y el PDF queda más alto
+Public Const ORD_DIAG_ROW_PAD As Double = 6
 ' Columna fuera del área de impresión donde se mide el alto de cada fila (las combinadas no se autoajustan)
 Public Const ORD_MEASURE_COLUMN As String = "J"
 Public Const CELL_ORD_TERMS As String = "A33"

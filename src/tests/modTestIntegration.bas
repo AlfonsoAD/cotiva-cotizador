@@ -143,7 +143,7 @@ Public Sub Test_Integracion_DiagnosticoRenglonesCortosCrece()
     Set ws = ThisWorkbook.Worksheets(SHEET_ORDER_TEMPLATE)
     For r = ORD_DIAG_FIRST_ROW To ORD_DIAG_FIRST_ROW + ORD_DIAG_ROWS - 1
         AssertTrue Not ws.Rows(r).Hidden, "fila " & r & " visible"
-        AssertTrue ws.Rows(r).RowHeight >= ORD_DIAG_LINES_PER_ROW * 12, "fila " & r & " alcanza para 5 renglones"
+        AssertTrue ws.Rows(r).RowHeight >= ORD_DIAG_LINES_PER_ROW * 12 + ORD_DIAG_ROW_PAD, "fila " & r & " alcanza para 5 renglones con margen"
     Next r
     AssertEqual t, DiagnosisFromSheet(ws), "texto completo"
 End Sub
@@ -168,6 +168,17 @@ Public Sub Test_Integracion_DiagnosticoCortoOcultaSobrantes()
     AssertEqual "", CStr(ws.Range(CELL_ORD_DIAGNOSIS).Value), "sin diagnostico"
     AssertTrue Not ws.Rows(ORD_DIAG_FIRST_ROW).Hidden, "primera fila visible"
     AssertEqual ORD_DIAG_MIN_HEIGHT, CDbl(ws.Rows(ORD_DIAG_FIRST_ROW).RowHeight), "alto minimo sin diagnostico"
+End Sub
+
+Public Sub Test_Integracion_DiagnosticoDeVariasFilasSinMinimo()
+    Dim o As ServiceOrder, ws As Worksheet
+    Set o = NewSampleOrder("OS-0001")
+    o.Diagnosis = ShortLines(ORD_DIAG_LINES_PER_ROW + 1)
+    FillOrderTemplate o
+    AssertEqual 0, LastErrorNumber(), "sin error"
+    Set ws = ThisWorkbook.Worksheets(SHEET_ORDER_TEMPLATE)
+    AssertTrue Not ws.Rows(ORD_DIAG_FIRST_ROW + 1).Hidden, "segunda fila visible"
+    AssertTrue ws.Rows(ORD_DIAG_FIRST_ROW).RowHeight < ORD_DIAG_MIN_HEIGHT, "primera fila sin hueco del minimo"
 End Sub
 
 Public Sub Test_Integracion_CondicionesYFirmasEnSuLugar()
