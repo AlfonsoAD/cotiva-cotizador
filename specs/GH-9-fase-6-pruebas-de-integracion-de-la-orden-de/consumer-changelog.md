@@ -14,9 +14,10 @@ Ninguno. Los datos guardados (`BD_*`, órdenes y cotizaciones) no cambian de for
 
 ### 2. Diagnóstico largo en el PDF de la orden
 
-- **Antes:** el bloque del diagnóstico medía 96 pt; un texto largo se cortaba en el PDF.
-- **Después:** el bloque mide 200 pt, para que quepa el diagnóstico completo (hasta 1000 caracteres). La hoja sigue ajustada a una sola página carta, así que el PDF se reduce un poco cuando el texto es largo.
-- **Qué debe hacer el consumidor:** nada. Los PDF de órdenes con diagnósticos cortos se ven casi igual, con letra un poco más pequeña si el texto es largo.
+- **Antes:** el bloque del diagnóstico tenía un alto fijo; un texto largo se cortaba en el PDF.
+- **Después:** el diagnóstico admite hasta 1000 caracteres y 40 renglones. El bloque crece con el texto y, si no cabe en una hoja carta, el PDF de la orden sale en dos hojas («Página 1» y «Página 2»). Los PDF con diagnóstico corto siguen en una hoja.
+- **Al guardar:** un diagnóstico de 41 renglones o más no se guarda; el formulario avisa en la pestaña de servicio hasta que se acorte.
+- **Qué debe hacer el consumidor:** si imprime o archiva la orden, debe aceptar que puede tener dos páginas. Si envía una orden con más de 40 renglones de diagnóstico, debe acortarlo antes de guardar.
 
 ### 3. Crédito de innobytes en el formulario de la orden
 
