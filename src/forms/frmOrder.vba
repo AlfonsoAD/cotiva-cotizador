@@ -56,6 +56,7 @@ Private WithEvents btnSwitch As MSForms.CommandButton
 Private WithEvents btnNew As MSForms.CommandButton
 Private WithEvents btnCompany As MSForms.CommandButton
 Private WithEvents btnSave As MSForms.CommandButton
+Private WithEvents btnPdf As MSForms.CommandButton
 Private WithEvents btnToQuote As MSForms.CommandButton
 Private WithEvents lblInnobytes As MSForms.Label
 
@@ -164,10 +165,11 @@ Private Sub BuildLayout()
     Set btnNew = AddButton(Me, "c_New", UI_BTN_NEW_ORDER, kindSecondary, FORM_MARGIN, 460, 120, 26)
     Set btnCompany = AddButton(Me, "c_Company", UI_BTN_COMPANY, kindSecondary, FORM_MARGIN + 126, 460, 90, 26)
     btnCompany.ControlTipText = TIP_COMPANY
-    Set btnSave = AddButton(Me, "c_Save", UI_BTN_SAVE, kindPrimary, rightEdge - 100, 460, 100, 26)
+    Set btnSave = AddButton(Me, "c_Save", UI_BTN_SAVE, kindPrimary, rightEdge - 206, 460, 100, 26)
+    Set btnPdf = AddButton(Me, "c_Pdf", UI_BTN_PDF, kindDark, rightEdge - 100, 460, 100, 26)
 
     ' --- Créditos de innobytes (clic = abrir el sitio) ---
-    Set lblInnobytes = AddLabel(Me, "c_Innobytes", InnobytesCredit(), 250, 467, 290, 12, 8, False, TextGray())
+    Set lblInnobytes = AddLabel(Me, "c_Innobytes", InnobytesCredit(), 250, 467, 180, 12, 8, False, TextGray())
     lblInnobytes.ControlTipText = Fmt(TIP_INNOBYTES, INNOBYTES_WEB)
     lblInnobytes.MousePointer = fmMousePointerUpArrow
 
@@ -175,12 +177,13 @@ Private Sub BuildLayout()
     cboStatus.TabIndex = 0
     mpgMain.TabIndex = 1
     btnSave.TabIndex = 2
-    btnToQuote.TabIndex = 3
-    btnNew.TabIndex = 4
-    btnCompany.TabIndex = 5
-    cboHistory.TabIndex = 6
-    btnLoad.TabIndex = 7
-    btnSwitch.TabIndex = 8
+    btnPdf.TabIndex = 3
+    btnToQuote.TabIndex = 4
+    btnNew.TabIndex = 5
+    btnCompany.TabIndex = 6
+    cboHistory.TabIndex = 7
+    btnLoad.TabIndex = 8
+    btnSwitch.TabIndex = 9
 End Sub
 
 ' Pestaña 0: cliente y vehículo.
@@ -761,6 +764,29 @@ Private Function SaveCurrentOrder() As Boolean
         SaveCurrentOrder = True
     End If
 End Function
+
+Private Sub btnPdf_Click()
+    Dim filePath As String, answer As VbMsgBoxResult
+    On Error GoTo Fail
+
+    If Not SyncOrderFromForm() Then Exit Sub
+
+    If mIsDirty Or Not mIsSaved Then
+        answer = MsgBox(Fmt(MSG_SAVE_ORDER_BEFORE_PDF), vbYesNoCancel + vbQuestion, TTL_PDF)
+        If answer = vbCancel Then Exit Sub
+        If answer = vbYes Then
+            If Not SaveCurrentOrder() Then Exit Sub
+        End If
+    End If
+
+    If Not ConfirmCompanyData() Then Exit Sub
+    FillOrderTemplate mOrder
+    filePath = ExportOrderPdf(mOrder)
+    If Len(filePath) > 0 Then MsgBox Fmt(MSG_PDF_CREATED, filePath), vbInformation
+    Exit Sub
+Fail:
+    ShowError "btnPdf_Click"
+End Sub
 
 Private Sub btnNew_Click()
     On Error GoTo Fail

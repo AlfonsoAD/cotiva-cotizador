@@ -63,7 +63,7 @@ Public Function ProtectAll() As Boolean
     Next sheetName
 
     ' Hojas visibles: protegidas (solo las celdas desbloqueadas se pueden editar)
-    For Each sheetName In Array(SHEET_TEMPLATE, SHEET_COMPANY, SHEET_HOME)
+    For Each sheetName In Array(SHEET_TEMPLATE, SHEET_ORDER_TEMPLATE, SHEET_COMPANY, SHEET_HOME)
         If SheetExists(CStr(sheetName)) Then LockSheet ThisWorkbook.Worksheets(CStr(sheetName))
     Next sheetName
 
@@ -95,7 +95,7 @@ Public Sub AdminUnlock()
         Exit Sub
     End If
 
-    For Each sheetName In Array(SHEET_QUOTES, SHEET_ITEMS, SHEET_CLIENTS, SHEET_ORDERS, SHEET_TEMPLATE, SHEET_COMPANY, SHEET_HOME)
+    For Each sheetName In Array(SHEET_QUOTES, SHEET_ITEMS, SHEET_CLIENTS, SHEET_ORDERS, SHEET_TEMPLATE, SHEET_ORDER_TEMPLATE, SHEET_COMPANY, SHEET_HOME)
         If SheetExists(CStr(sheetName)) Then
             ThisWorkbook.Worksheets(CStr(sheetName)).Visible = xlSheetVisible
             UnlockSheet ThisWorkbook.Worksheets(CStr(sheetName))
