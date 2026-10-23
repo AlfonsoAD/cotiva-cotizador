@@ -80,6 +80,10 @@ Public Sub EnsureWorkbookStructure()
         EnsureDataHeaders
     End If
 
+    If Not SheetExists(SHEET_TAX_REGIMES) Then AddSheet SHEET_TAX_REGIMES
+    If Not SheetExists(SHEET_CFDI_USES) Then AddSheet SHEET_CFDI_USES
+    EnsureSatCatalogs
+
     EnsureCompanySheet
     UpgradeCompanySheet
 

@@ -44,6 +44,41 @@ Public Const ORDER_STATUS_CANCELLED As String = "Cancelada"
 Public Const ORDER_STATUSES As String = "Recibida|En diagnóstico|En reparación|Lista|Entregada|Cancelada"
 Public Const FUEL_LEVELS As String = "R|¼|½|¾|Lleno"
 
+' --- Catálogos del SAT (CFDI 4.0): semillas de BD_RegimenFiscal y BD_UsoCFDI ---
+' Entradas separadas por "|"; clave y descripción por "=". Solo se escriben cuando la
+' hoja no tiene filas de datos; el administrador las actualiza en la hoja, sin tocar código.
+Public Const SAT_TAX_REGIMES_SEED As String = "601=General de Ley Personas Morales|" & _
+    "603=Personas Morales con Fines no Lucrativos|" & _
+    "605=Sueldos y Salarios e Ingresos Asimilados a Salarios|" & _
+    "606=Arrendamiento|" & _
+    "607=Régimen de Enajenación o Adquisición de Bienes|" & _
+    "608=Demás ingresos|" & _
+    "610=Residentes en el Extranjero sin Establecimiento Permanente en México|" & _
+    "611=Ingresos por Dividendos (socios y accionistas)|" & _
+    "612=Personas Físicas con Actividades Empresariales y Profesionales|" & _
+    "614=Ingresos por intereses|" & _
+    "615=Régimen de los ingresos por obtención de premios|" & _
+    "616=Sin obligaciones fiscales|" & _
+    "620=Sociedades Cooperativas de Producción que optan por diferir sus ingresos|" & _
+    "621=Incorporación Fiscal|" & _
+    "622=Actividades Agrícolas, Ganaderas, Silvícolas y Pesqueras|" & _
+    "623=Opcional para Grupos de Sociedades|" & _
+    "624=Coordinados|" & _
+    "625=Régimen de las Actividades Empresariales con ingresos a través de Plataformas Tecnológicas|" & _
+    "626=Régimen Simplificado de Confianza"
+Public Const SAT_CFDI_USES_SEED As String = "G01=Adquisición de mercancías|G02=Devoluciones, descuentos o bonificaciones|" & _
+    "G03=Gastos en general|I01=Construcciones|" & _
+    "I02=Mobiliario y equipo de oficina por inversiones|I03=Equipo de transporte|" & _
+    "I04=Equipo de cómputo y accesorios|I05=Dados, troqueles, moldes, matrices y herramental|" & _
+    "I06=Comunicaciones telefónicas|I07=Comunicaciones satelitales|" & _
+    "I08=Otra maquinaria y equipo|D01=Honorarios médicos, dentales y gastos hospitalarios|" & _
+    "D02=Gastos médicos por incapacidad o discapacidad|D03=Gastos funerales|" & _
+    "D04=Donativos|D05=Intereses reales efectivamente pagados por créditos hipotecarios (casa habitación)|" & _
+    "D06=Aportaciones voluntarias al SAR|D07=Primas por seguros de gastos médicos|" & _
+    "D08=Gastos de transportación escolar obligatoria|D09=Depósitos en cuentas para el ahorro, primas que tengan como base planes de pensiones|" & _
+    "D10=Pagos por servicios educativos (colegiaturas)|S01=Sin efectos fiscales|" & _
+    "CP01=Pagos|CN01=Nómina"
+
 ' --- Tasas de IVA ---
 ' El orden coincide con la lista del formulario (16% / 8% / Sin IVA).
 Public Enum TaxOption

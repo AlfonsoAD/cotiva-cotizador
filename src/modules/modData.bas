@@ -12,14 +12,17 @@ Attribute VB_Name = "modData"
 ' Estructura (fila 1 = encabezados; se conservan en español por compatibilidad):
 '   BD_Cotizaciones  A:I  Folio | Fecha | Cliente | Subtotal | IVA | Total | TasaIVA | Vigencia | OrdenFolio
 '   BD_Detalle       A:E  Folio | Descripcion | Cantidad | PrecioUnitario | Total
-'   BD_Clientes      A:F  Cliente | FechaAlta | Telefono1 | Telefono2 | Correo | Direccion
+'   BD_Clientes      A:Q  Cliente | FechaAlta | Telefono1 | Telefono2 | Correo | Direccion |
+'                        RFC | RazonSocial | RegimenFiscal | CPFiscal | UsoCFDI | Calle | NumExterior |
+'                        NumInterior | Colonia | Municipio | Estado
+'   BD_RegimenFiscal, BD_UsoCFDI  A:B  Clave | Descripcion (catálogos del SAT)
 '   BD_Ordenes       A:Z  Ver ServiceOrder.cls (26 columnas)
 '==============================================================================
 Option Explicit
 
 Private Const QUOTE_COLUMNS As Long = 9
 Private Const ITEM_COLUMNS As Long = 5
-Private Const CLIENT_COLUMNS As Long = 6
+Private Const CLIENT_COLUMNS As Long = 17
 Private Const ORDER_COLUMNS As Long = 26
 
 '--- Utilidades internas -------------------------------------------------------
@@ -126,7 +129,9 @@ Public Sub EnsureDataHeaders()
     If SheetExists(SHEET_CLIENTS) Then
         Set ws = ThisWorkbook.Worksheets(SHEET_CLIENTS)
         UnlockSheet ws
-        EnsureHeaders ws, Array("Cliente", "FechaAlta", "Telefono1", "Telefono2", "Correo", "Direccion")
+        EnsureHeaders ws, Array("Cliente", "FechaAlta", "Telefono1", "Telefono2", "Correo", "Direccion", _
+            "RFC", "RazonSocial", "RegimenFiscal", "CPFiscal", "UsoCFDI", "Calle", "NumExterior", _
+            "NumInterior", "Colonia", "Municipio", "Estado")
     End If
 
     If SheetExists(SHEET_ORDERS) Then
@@ -322,19 +327,19 @@ End Sub
 
 ' Catálogo ordenado alfabéticamente (arreglo), o Empty si no hay clientes.
 Public Function ListClients() As Variant
-    Dim data As Variant, i As Long, j As Long, n As Long
-    Dim names() As String, current As String
+    ListClients = SortedNames(ReadData(ThisWorkbook.Worksheets(SHEET_CLIENTS), CLIENT_COLUMNS), vbNullString)
+End Function
 
-    data = ReadData(ThisWorkbook.Worksheets(SHEET_CLIENTS), CLIENT_COLUMNS)
-    If IsEmpty(data) Then
-        ListClients = Empty
-        Exit Function
-    End If
+' Nombres de las filas de data (col. A) en orden alfabético, o Empty. Con filterText
+' no vacío solo los que lo contienen en nombre, teléfonos, correo, RFC o razón social.
+Private Function SortedNames(ByVal data As Variant, ByVal filterText As String) As Variant
+    Dim i As Long, j As Long, n As Long, names() As String, current As String
 
+    If IsEmpty(data) Then Exit Function
     ReDim names(0 To UBound(data, 1) - 1)
     For i = 1 To UBound(data, 1)
         current = Trim$(CStr(data(i, 1)))
-        If Len(current) > 0 Then
+        If Len(current) > 0 And RowMatches(data, i, filterText) Then
             ' Ordenamiento por inserción: recorremos a la derecha los mayores
             j = n - 1
             Do While j >= 0
@@ -347,12 +352,24 @@ Public Function ListClients() As Variant
         End If
     Next i
 
-    If n = 0 Then
-        ListClients = Empty
-    Else
-        ReDim Preserve names(0 To n - 1)
-        ListClients = names
+    If n = 0 Then Exit Function
+    ReDim Preserve names(0 To n - 1)
+    SortedNames = names
+End Function
+
+Private Function RowMatches(ByVal data As Variant, ByVal rowIndex As Long, ByVal filterText As String) As Boolean
+    Dim col As Variant
+
+    If Len(filterText) = 0 Then
+        RowMatches = True
+        Exit Function
     End If
+    For Each col In Array(1, 3, 4, 5, 7, 8)
+        If InStr(1, CStr(data(rowIndex, CLng(col))), filterText, vbTextCompare) > 0 Then
+            RowMatches = True
+            Exit Function
+        End If
+    Next col
 End Function
 
 ' Llena el catálogo con los clientes de las cotizaciones ya guardadas
@@ -692,31 +709,181 @@ Private Sub DeleteQuote(ByVal quoteNumber As String)
     DeleteRowsByNumber ThisWorkbook.Worksheets(SHEET_ITEMS), quoteNumber
 End Sub
 
-'--- Clientes con datos fiscales (contrato; el cuerpo lo completan T2 y T3) ------
+'--- Catálogos del SAT -----------------------------------------------------------
 
+' Pone encabezados Clave | Descripcion en las hojas de catálogo y las siembra con
+' las constantes de modConfig si no tienen filas de datos. Si ya tienen datos no
+' las toca: el administrador las actualiza en la hoja. El libro debe estar
+' desprotegido (lo hace PrepareWorkbook).
 Public Sub EnsureSatCatalogs()
+    SeedCatalog SHEET_TAX_REGIMES, SAT_TAX_REGIMES_SEED
+    SeedCatalog SHEET_CFDI_USES, SAT_CFDI_USES_SEED
 End Sub
 
+Private Sub SeedCatalog(ByVal sheetName As String, ByVal seed As String)
+    Dim ws As Worksheet, entries() As String, parts() As String, i As Long, values() As Variant
+
+    If Not SheetExists(sheetName) Then Exit Sub
+    Set ws = ThisWorkbook.Worksheets(sheetName)
+    UnlockSheet ws
+    EnsureHeaders ws, Array("Clave", "Descripcion")
+    ws.Columns(1).NumberFormat = "@"                 ' Las claves conservan su forma ("601", "G03")
+    If LastRow(ws) >= 2 Then Exit Sub
+
+    entries = Split(seed, "|")
+    ReDim values(1 To UBound(entries) + 1, 1 To 2)
+    For i = 0 To UBound(entries)
+        parts = Split(entries(i), "=", 2)
+        values(i + 1, 1) = parts(0)
+        values(i + 1, 2) = parts(1)
+    Next i
+    ws.Range("A2").Resize(UBound(values, 1), 2).Value = values
+    ws.Columns("A:B").AutoFit
+End Sub
+
+' Filas con clave de un catálogo como arreglo (0 To n-1, 0 To 1): clave, descripción.
+' Empty si la hoja no existe o no tiene filas.
+Private Function ReadCatalog(ByVal sheetName As String) As Variant
+    Dim data As Variant, i As Long, n As Long, result() As Variant
+
+    If Not SheetExists(sheetName) Then Exit Function
+    data = ReadData(ThisWorkbook.Worksheets(sheetName), 2)
+    If IsEmpty(data) Then Exit Function
+
+    For i = 1 To UBound(data, 1)
+        If Len(Trim$(CStr(data(i, 1)))) > 0 Then n = n + 1
+    Next i
+    If n = 0 Then Exit Function
+
+    ReDim result(0 To n - 1, 0 To 1)
+    n = 0
+    For i = 1 To UBound(data, 1)
+        If Len(Trim$(CStr(data(i, 1)))) > 0 Then
+            result(n, 0) = Trim$(CStr(data(i, 1)))
+            result(n, 1) = CStr(data(i, 2))
+            n = n + 1
+        End If
+    Next i
+    ReadCatalog = result
+End Function
+
 Public Function ListTaxRegimes() As Variant
-    ListTaxRegimes = Empty
+    ListTaxRegimes = ReadCatalog(SHEET_TAX_REGIMES)
 End Function
 
 Public Function ListCfdiUses() As Variant
-    ListCfdiUses = Empty
+    ListCfdiUses = ReadCatalog(SHEET_CFDI_USES)
 End Function
 
+'--- Clientes con datos fiscales -------------------------------------------------
+
+' Fila del cliente en BD_Clientes (sin distinguir mayúsculas ni espacios de los extremos), o 0.
+Private Function FindClientRow(ByVal clientText As String) As Long
+    Dim data As Variant, i As Long
+
+    data = ReadData(ThisWorkbook.Worksheets(SHEET_CLIENTS), 2)
+    If IsEmpty(data) Then Exit Function
+    clientText = Trim$(clientText)
+    For i = 1 To UBound(data, 1)
+        If StrComp(Trim$(CStr(data(i, 1))), clientText, vbTextCompare) = 0 Then
+            FindClientRow = i + 1
+            Exit Function
+        End If
+    Next i
+End Function
+
+' El cliente completo (contacto y datos fiscales), o Nothing si no existe.
 Public Function LoadClient(ByVal clientText As String) As Client
-    Set LoadClient = Nothing
+    Dim ws As Worksheet, r As Long, v As Variant, c As Client
+
+    clientText = Trim$(clientText)
+    If Len(clientText) = 0 Then Exit Function
+    r = FindClientRow(clientText)
+    If r = 0 Then Exit Function
+
+    Set ws = ThisWorkbook.Worksheets(SHEET_CLIENTS)
+    v = ws.Range(ws.Cells(r, 1), ws.Cells(r, CLIENT_COLUMNS)).Value
+    Set c = New Client
+    c.Name = Trim$(CStr(v(1, 1)))
+    c.CreatedOn = CellDate(v(1, 2))
+    c.Phone1 = CStr(v(1, 3))
+    c.Phone2 = CStr(v(1, 4))
+    c.Email = CStr(v(1, 5))
+    c.Address = CStr(v(1, 6))
+    c.Rfc = CStr(v(1, 7))
+    c.LegalName = CStr(v(1, 8))
+    c.TaxRegime = CStr(v(1, 9))
+    c.TaxZip = CStr(v(1, 10))
+    c.CfdiUse = CStr(v(1, 11))
+    c.Street = CStr(v(1, 12))
+    c.ExtNumber = CStr(v(1, 13))
+    c.IntNumber = CStr(v(1, 14))
+    c.Neighborhood = CStr(v(1, 15))
+    c.Municipality = CStr(v(1, 16))
+    c.State = CStr(v(1, 17))
+    Set LoadClient = c
 End Function
 
+' Guarda al cliente: lo agrega si el nombre no existe (FechaAlta = hoy) o reescribe
+' C:Q de su fila, vacíos incluidos. El nombre (A) y la fecha de alta (B) no cambian.
+' False sin escribir si el nombre está vacío; con Nothing falla.
 Public Function SaveClient(ByVal c As Client) As Boolean
-    SaveClient = False
+    Dim ws As Worksheet, r As Long, clientName As String
+
+    On Error GoTo Fail
+    Application.ScreenUpdating = False
+
+    clientName = Trim$(c.Name)
+    If Len(clientName) = 0 Then GoTo Cleanup
+
+    AddClient clientName
+    r = FindClientRow(clientName)
+    If r = 0 Then Err.Raise vbObjectError + 514, "SaveClient", "No se pudo ubicar la fila del cliente"
+
+    Set ws = ThisWorkbook.Worksheets(SHEET_CLIENTS)
+    ' Formato texto antes de escribir: "01000" y "007" conservan sus ceros
+    ws.Range(ws.Cells(r, 3), ws.Cells(r, 4)).NumberFormat = "@"
+    ws.Cells(r, 7).NumberFormat = "@"
+    ws.Range(ws.Cells(r, 9), ws.Cells(r, 11)).NumberFormat = "@"
+    ws.Range(ws.Cells(r, 13), ws.Cells(r, 14)).NumberFormat = "@"
+    ws.Cells(r, 3).Resize(1, CLIENT_COLUMNS - 2).Value = Array( _
+        Trim$(c.Phone1), Trim$(c.Phone2), SafeCellText(Trim$(c.Email)), SafeCellText(Trim$(c.Address)), _
+        UCase$(Trim$(c.Rfc)), SafeCellText(Trim$(c.LegalName)), Trim$(c.TaxRegime), Trim$(c.TaxZip), _
+        Trim$(c.CfdiUse), SafeCellText(Trim$(c.Street)), Trim$(c.ExtNumber), Trim$(c.IntNumber), _
+        SafeCellText(Trim$(c.Neighborhood)), SafeCellText(Trim$(c.Municipality)), SafeCellText(Trim$(c.State)))
+    If SAVE_WORKBOOK_ON_SAVE And Len(ThisWorkbook.Path) > 0 Then ThisWorkbook.Save
+
+    SaveClient = True
+Cleanup:
+    Application.ScreenUpdating = True
+    Exit Function
+Fail:
+    ShowError "SaveClient"
+    Resume Cleanup
 End Function
 
+' Nombre del primer otro cliente con ese RFC (sin distinguir mayúsculas), o "".
 Public Function FindClientByRfc(ByVal rfc As String, ByVal exceptClient As String) As String
-    FindClientByRfc = vbNullString
+    Dim data As Variant, i As Long
+
+    rfc = UCase$(Trim$(rfc))
+    If Len(rfc) = 0 Then Exit Function
+    data = ReadData(ThisWorkbook.Worksheets(SHEET_CLIENTS), 7)
+    If IsEmpty(data) Then Exit Function
+    exceptClient = Trim$(exceptClient)
+    For i = 1 To UBound(data, 1)
+        If UCase$(Trim$(CStr(data(i, 7)))) = rfc Then
+            If StrComp(Trim$(CStr(data(i, 1))), exceptClient, vbTextCompare) <> 0 Then
+                FindClientByRfc = Trim$(CStr(data(i, 1)))
+                Exit Function
+            End If
+        End If
+    Next i
 End Function
 
+' Nombres cuyo nombre, RFC, razón social, teléfonos o correo contienen el texto
+' (sin distinguir mayúsculas), en orden alfabético. Con texto vacío, todos. Empty si ninguno.
 Public Function SearchClients(ByVal searchText As String) As Variant
-    SearchClients = Empty
+    SearchClients = SortedNames(ReadData(ThisWorkbook.Worksheets(SHEET_CLIENTS), CLIENT_COLUMNS), _
+        Trim$(searchText))
 End Function

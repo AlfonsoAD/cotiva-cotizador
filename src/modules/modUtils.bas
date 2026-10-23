@@ -125,7 +125,7 @@ End Function
 
 ' True solo con exactamente 5 digitos (codigo postal).
 Public Function IsValidPostalCode(ByVal zipText As String) As Boolean
-    IsValidPostalCode = False
+    IsValidPostalCode = (Len(zipText) = 5) And (zipText Like "#####")
 End Function
 
 '--- IVA -----------------------------------------------------------------------
