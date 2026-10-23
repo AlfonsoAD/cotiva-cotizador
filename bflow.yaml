@@ -16,3 +16,7 @@ check:
     # 1-2 minutos; sin Excel falla, no se salta.
     - name: test
       run: powershell -NoProfile -ExecutionPolicy Bypass -File build/test.ps1
+guard:
+  # Las pruebas VBA viven en src/tests/modTest*.bas; sin esto bflow no las
+  # reconoce como T1 del contrato (solo trae patrones de Go/JS).
+  test_patterns: ["modTest*.bas", "src/tests/modTest*.bas"]
