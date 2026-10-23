@@ -123,6 +123,11 @@ Public Function IsValidRfc(ByVal rfc As String) As Boolean
     End Select
 End Function
 
+' True solo con exactamente 5 digitos (codigo postal).
+Public Function IsValidPostalCode(ByVal zipText As String) As Boolean
+    IsValidPostalCode = False
+End Function
+
 '--- IVA -----------------------------------------------------------------------
 
 ' Tasa que corresponde a una opción de la lista (TaxOption).

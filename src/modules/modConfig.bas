@@ -20,6 +20,8 @@ Public Const SHEET_QUOTES As String = "BD_Cotizaciones"
 Public Const SHEET_ITEMS As String = "BD_Detalle"
 Public Const SHEET_CLIENTS As String = "BD_Clientes"
 Public Const SHEET_ORDERS As String = "BD_Ordenes"
+Public Const SHEET_TAX_REGIMES As String = "BD_RegimenFiscal"
+Public Const SHEET_CFDI_USES As String = "BD_UsoCFDI"
 Public Const SHEET_COMPANY As String = "Mi empresa"
 
 ' --- Folios ---
@@ -135,6 +137,7 @@ Public Const HOME_INNOBYTES_LOGO_NAME As String = "LogoInnobytesInicio"
 Public Const HOME_COTIVA_LOGO_HEIGHT As Double = 44           ' Alto del logo de Cotiva (puntos)
 Public Const HOME_INNOBYTES_LOGO_HEIGHT As Double = 48        ' Alto del logo de innobytes (pie)
 Public Const HOME_BUTTON_NAME As String = "btnAbrirCotizador"
+Public Const HOME_CLIENTS_BUTTON_NAME As String = "btnClientes"
 Public Const HOME_RULE_NAME As String = "reglaInicio"
 Public Const HOME_FIRST_FEATURE_ROW As Long = 10              ' Primera fila de la lista de ventajas
 

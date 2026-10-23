@@ -322,3 +322,7 @@ Private Sub FitLogoInZone(ByVal ws As Worksheet, ByVal logoName As String, _
     shp.Top = zone.Top + (zone.Height - shp.Height) / 2
     shp.Placement = xlMove
 End Sub
+
+' Agrega el boton "Clientes" en Inicio si falta (contrato; lo completa T5).
+Public Sub EnsureHomeClientsButton()
+End Sub

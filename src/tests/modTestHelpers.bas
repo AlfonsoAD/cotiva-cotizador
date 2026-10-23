@@ -79,7 +79,7 @@ Public Sub ClearClientContacts()
     ws.Range("C2:F" & ws.Rows.Count).ClearContents
 End Sub
 
-' Libro v8.0.0: sin BD_Ordenes, sin I1 en BD_Cotizaciones y sin C1:F1 en BD_Clientes.
+' Libro v9.0.0: sin BD_Ordenes, sin I1 en BD_Cotizaciones, sin C1:F1 ni G1:Q1 en BD_Clientes y sin hojas de catalogo del SAT.
 Public Sub MakeLegacyWorkbook()
     Dim ws As Worksheet, alertsBefore As Boolean
 
@@ -90,11 +90,14 @@ Public Sub MakeLegacyWorkbook()
     Set ws = ThisWorkbook.Worksheets(SHEET_CLIENTS)
     UnlockSheet ws
     ws.Range("C1:F1").ClearContents
+    ws.Range("G1:Q1").ClearContents
 
     alertsBefore = Application.DisplayAlerts
     Application.DisplayAlerts = False
     On Error Resume Next
     ThisWorkbook.Worksheets(SHEET_ORDERS).Delete
+    ThisWorkbook.Worksheets(SHEET_TAX_REGIMES).Delete
+    ThisWorkbook.Worksheets(SHEET_CFDI_USES).Delete
     On Error GoTo 0
     Application.DisplayAlerts = alertsBefore
 End Sub

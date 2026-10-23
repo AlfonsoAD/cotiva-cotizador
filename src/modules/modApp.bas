@@ -93,3 +93,13 @@ Private Function AddSheet(ByVal sheetName As String) As Worksheet
     ws.Name = sheetName
     Set AddSheet = ws
 End Function
+
+' Abre el catalogo de clientes desde Inicio (contrato; lo completa T4).
+Public Sub OpenClientsTool()
+End Sub
+
+' Abre frmClients modal y regresa el cliente elegido, o "" si no eligio (contrato; lo completa T4).
+Public Function PickClient(ByVal currentClient As String, _
+        Optional ByVal pickMode As Boolean = True) As String
+    PickClient = vbNullString
+End Function

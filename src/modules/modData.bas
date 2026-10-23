@@ -691,3 +691,32 @@ Private Sub DeleteQuote(ByVal quoteNumber As String)
     DeleteRowsByNumber ThisWorkbook.Worksheets(SHEET_QUOTES), quoteNumber
     DeleteRowsByNumber ThisWorkbook.Worksheets(SHEET_ITEMS), quoteNumber
 End Sub
+
+'--- Clientes con datos fiscales (contrato; el cuerpo lo completan T2 y T3) ------
+
+Public Sub EnsureSatCatalogs()
+End Sub
+
+Public Function ListTaxRegimes() As Variant
+    ListTaxRegimes = Empty
+End Function
+
+Public Function ListCfdiUses() As Variant
+    ListCfdiUses = Empty
+End Function
+
+Public Function LoadClient(ByVal clientText As String) As Client
+    Set LoadClient = Nothing
+End Function
+
+Public Function SaveClient(ByVal c As Client) As Boolean
+    SaveClient = False
+End Function
+
+Public Function FindClientByRfc(ByVal rfc As String, ByVal exceptClient As String) As String
+    FindClientByRfc = vbNullString
+End Function
+
+Public Function SearchClients(ByVal searchText As String) As Variant
+    SearchClients = Empty
+End Function
