@@ -5,7 +5,7 @@
 .DESCRIPTION
   1. Crea un libro nuevo de Excel.
   2. Importa modulos (.bas) y clases (.cls).
-  3. Crea el formulario frmQuote y le inserta su codigo (src\forms\frmQuote.vba).
+  3. Crea los formularios frmQuote y frmOrder y les inserta su codigo (src\forms\).
   4. Ejecuta modBuild.BuildWorkbook: hojas, boton de inicio, logos y proteccion.
   5. Elimina modBuild y guarda el .xlsm.
 

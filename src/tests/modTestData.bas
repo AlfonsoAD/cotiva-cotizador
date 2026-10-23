@@ -153,3 +153,27 @@ End Sub
 Public Sub Test_SaveOrder_NothingFalla()
     AssertFails "modData.SaveOrder", "SaveOrder Nothing", Nothing
 End Sub
+
+Public Sub Test_ListOrderStaff_DistintosOrdenados()
+    Dim o As ServiceOrder, staff As Variant
+    Set o = NewSampleOrder("OS-0001")
+    o.ReceivedBy = "Ana"
+    o.DeliveredBy = " ana "
+    AssertTrue SaveOrder(o), "SaveOrder 1"
+    Set o = NewSampleOrder("OS-0002")
+    o.ReceivedBy = "Beto"
+    o.DeliveredBy = "Beto"
+    AssertTrue SaveOrder(o), "SaveOrder 2"
+
+    staff = ListOrderStaff()
+    AssertTrue Not IsEmpty(staff), "hay nombres"
+    If IsEmpty(staff) Then Exit Sub
+    AssertEqual 2, UBound(staff) - LBound(staff) + 1, "dos nombres"
+    AssertEqual 0, LBound(staff), "0-based"
+    AssertEqual "Ana", staff(0), "primero"
+    AssertEqual "Beto", staff(1), "segundo"
+End Sub
+
+Public Sub Test_ListOrderStaff_SinOrdenesEmpty()
+    AssertTrue IsEmpty(ListOrderStaff()), "sin ordenes"
+End Sub

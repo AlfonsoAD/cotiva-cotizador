@@ -11,7 +11,17 @@ Option Explicit
 ' Macro del botón de la hoja Inicio.
 Public Sub OpenQuoteTool()
     If Not PrepareWorkbook() Then Exit Sub
-    frmQuote.Show vbModeless          ' vbModeless: se puede ver la Plantilla con el formulario abierto
+    ShowQuoteForm
+End Sub
+
+' vbModeless: se puede ver la Plantilla con el formulario abierto.
+Public Sub ShowQuoteForm()
+    frmQuote.Show vbModeless
+End Sub
+
+' Abre la orden de servicio sin modal, igual que ShowQuoteForm.
+Public Sub ShowOrderForm()
+    frmOrder.Show vbModeless
 End Sub
 
 ' Deja el libro listo para trabajar. Regresa False si algo impide abrir el cotizador.

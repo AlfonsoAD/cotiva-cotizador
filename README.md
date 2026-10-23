@@ -17,6 +17,7 @@ src/
     modStrings     Todos los textos visibles (español)
     modTheme       Colores de marca, tipografía, utilidades de color
     modUtils       Validaciones, formatos, importe con letra, errores
+    modFormKit     Helpers de maquetado de formularios (los usan frmQuote y frmOrder)
     modData        Capa de datos (lo único a cambiar para migrar a SQLite/API)
     modCompany     Hoja "Mi empresa": datos del emisor, vigencia, colores
     modTemplate    Plantilla: diseño, llenado, logos y PDF
@@ -24,7 +25,7 @@ src/
     modSecurity    Protección del libro y macros de administrador
     modSecrets.example.bas   Plantilla de la clave (modSecrets.bas NO se sube)
   classes/     Quote, QuoteItem, ServiceOrder
-  forms/       frmQuote.vba (solo código; la interfaz se construye por código)
+  forms/       frmQuote.vba y frmOrder.vba (solo código; la interfaz se construye por código)
   build/       modBuild.bas (arma el libro; se elimina del .xlsm final)
   tests/       Pruebas automáticas (solo viven en el libro de pruebas, nunca en el .xlsm)
 build/
@@ -47,6 +48,7 @@ dist/          Salida del build (ignorada por Git)
    ```
 
 4. Abre `dist/Cotiva-Cotizador.xlsm`, habilita macros y presiona **Abrir cotizador**.
+   La orden de servicio se abre desde el cotizador con el botón **Orden de servicio** de la barra superior; en la orden, el botón **Cotización** regresa. Si hay cambios sin guardar, pregunta antes de cambiar.
 
 > El build abre Excel visible. Si aparece una ventana de error de VBA, significa que hay un error de
 > compilación: toma captura, cierra Excel y corrige en `src/`.
