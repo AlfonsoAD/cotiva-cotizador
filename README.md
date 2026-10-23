@@ -17,15 +17,15 @@ src/
     modStrings     Todos los textos visibles (español)
     modTheme       Colores de marca, tipografía, utilidades de color
     modUtils       Validaciones, formatos, importe con letra, errores
-    modFormKit     Helpers de maquetado de formularios (los usan frmQuote y frmOrder)
+    modFormKit     Helpers de maquetado de formularios (los usan frmQuote, frmOrder y frmClients)
     modData        Capa de datos (lo único a cambiar para migrar a SQLite/API)
     modCompany     Hoja "Mi empresa": datos del emisor, vigencia, colores
     modTemplate    Plantilla y PlantillaOrden: diseño, llenado, logos y PDF
     modHome        Hoja "Inicio": portada, botón y logos de Cotiva e innobytes
     modSecurity    Protección del libro y macros de administrador
     modSecrets.example.bas   Plantilla de la clave (modSecrets.bas NO se sube)
-  classes/     Quote, QuoteItem, ServiceOrder
-  forms/       frmQuote.vba y frmOrder.vba (solo código; la interfaz se construye por código)
+  classes/     Quote, QuoteItem, ServiceOrder, Client
+  forms/       frmQuote.vba, frmOrder.vba y frmClients.vba (solo código; la interfaz se construye por código)
   build/       modBuild.bas (arma el libro; se elimina del .xlsm final)
   tests/       Pruebas automáticas (solo viven en el libro de pruebas, nunca en el .xlsm)
 build/
@@ -145,6 +145,7 @@ Git, pero dentro del `.xlsm` solo la protege la contraseña del proyecto VBA.
 |---|---|
 | `AdminUnlock` | Pide la clave y deja todas las hojas visibles y editables |
 | `AdminLock` | Vuelve a proteger todo |
+| `OpenClientsTool` | Abre el catálogo de clientes (es la macro del botón «Clientes» de Inicio) |
 | `DesignTemplate` | Rediseña la Plantilla (conserva logos) |
 | `DesignOrderTemplate` | Rediseña la PlantillaOrden del PDF de la orden (las condiciones vuelven al texto original; el logo se toma de la Plantilla) |
 | `DesignHome` | Rediseña la pantalla de Inicio (conserva logos) |
@@ -155,10 +156,36 @@ Git, pero dentro del `.xlsm` solo la protege la contraseña del proyecto VBA.
 **Cambiar la clave** de un libro ya protegido: `AdminUnlock` con la clave vieja → cambia
 `APP_PASSWORD` → `AdminLock`. Si cambias la constante sin desproteger antes, el libro queda bloqueado.
 
+## Clientes y datos fiscales
+
+El botón **Clientes** de Inicio abre `frmClients`; también se abre con **Clientes…** junto al combo de cliente
+de la cotización y de la orden de servicio. Tiene un buscador (nombre, RFC, razón social, teléfonos o correo),
+la lista de clientes y dos pestañas: **Contacto** y **Datos fiscales** (los de la Constancia de Situación Fiscal).
+Todo es opcional: el RFC con formato inválido, el CP fiscal que no tenga 5 dígitos y un RFC que ya tiene otro
+cliente solo muestran un aviso. El nombre identifica al cliente: no se renombra y no hay forma de eliminarlo.
+Desde la cotización o la orden, **Usar este cliente** lo pone en el combo (en la orden también reemplaza
+teléfonos, correo y dirección).
+
+`BD_Clientes` queda en las columnas A:Q:
+
+| Columnas | Contenido |
+|---|---|
+| A:F | `Cliente`, `FechaAlta`, `Telefono1`, `Telefono2`, `Correo`, `Direccion` |
+| G:K | `RFC`, `RazonSocial`, `RegimenFiscal` (clave), `CPFiscal`, `UsoCFDI` (clave) |
+| L:Q | `Calle`, `NumExterior`, `NumInterior`, `Colonia`, `Municipio`, `Estado` |
+
+El CP, las claves y los números van como texto para conservar el cero a la izquierda ("01000").
+
+**Catálogos del SAT.** Las hojas ocultas `BD_RegimenFiscal` y `BD_UsoCFDI` (columnas `Clave | Descripcion`) alimentan
+los combos y se siembran con el catálogo vigente (CFDI 4.0) al crearlas, también en libros anteriores. Si la hoja ya
+tiene filas no se reescribe. Para actualizarlos cuando el SAT los cambie: `AdminUnlock`, edita las filas de la
+hoja (la clave en la columna A, sin dejar el formato de texto) y `AdminLock`. Una clave guardada en un cliente que
+ya no esté en el catálogo se sigue mostrando.
+
 ## Migrar datos de una versión anterior
 
 Las hojas de datos conservan los mismos nombres y columnas, con estas adiciones: `BD_Cotizaciones` agrega
-la columna I (`OrdenFolio`), `BD_Clientes` agrega C:F (contacto) y existe la hoja nueva `BD_Ordenes`
+la columna I (`OrdenFolio`), `BD_Clientes` agrega C:F (contacto) y G:Q (datos fiscales), existen las hojas nuevas `BD_RegimenFiscal` y `BD_UsoCFDI` y existe la hoja `BD_Ordenes`
 (26 columnas, ver `ServiceOrder.cls`). Al abrir un libro anterior se crean solas. En el archivo viejo y en el nuevo ejecuta
 `AdminUnlock`, copia las filas de `BD_Cotizaciones`, `BD_Detalle` y `BD_Clientes` (sin encabezados)
 y ejecuta `AdminLock` en el nuevo.

@@ -53,6 +53,7 @@ Private WithEvents cboDeliveredBy As MSForms.ComboBox
 Private WithEvents cboHistory As MSForms.ComboBox
 Private WithEvents btnLoad As MSForms.CommandButton
 Private WithEvents btnSwitch As MSForms.CommandButton
+Private WithEvents btnClients As MSForms.CommandButton
 Private WithEvents btnNew As MSForms.CommandButton
 Private WithEvents btnCompany As MSForms.CommandButton
 Private WithEvents btnSave As MSForms.CommandButton
@@ -194,7 +195,7 @@ Private Sub BuildClientPage(ByVal pg As Object)
     AddFieldLabel pg, "c_LClient", UI_ORD_LBL_CLIENT, 12, 24, 280
     AddFieldLabel pg, "c_LPhone1", UI_ORD_LBL_PHONE1, 300, 24, 140
     AddFieldLabel pg, "c_LPhone2", UI_ORD_LBL_PHONE2, 448, 24, 140
-    Set cboClient = AddComboBox(pg, "c_Client", 12, 38, 280, 22)
+    Set cboClient = AddComboBox(pg, "c_Client", 12, 38, 200, 22)
     With cboClient
         .Style = fmStyleDropDownCombo             ' Se puede escribir un cliente nuevo
         .MatchEntry = fmMatchEntryComplete        ' Completa mientras escribes
@@ -203,6 +204,8 @@ Private Sub BuildClientPage(ByVal pg As Object)
         .ListRows = 10
         .ControlTipText = TIP_CLIENT
     End With
+    Set btnClients = AddButton(pg, "c_Clients", UI_BTN_CLIENTS, kindSecondary, 218, 38, 74, 22)
+    btnClients.ControlTipText = TIP_CLIENTS
     Set txtPhone1 = AddTextBox(pg, "c_Phone1", 300, 38, 140, 22)
     txtPhone1.MaxLength = 20
     Set txtPhone2 = AddTextBox(pg, "c_Phone2", 448, 38, 140, 22)
@@ -264,6 +267,7 @@ Private Sub BuildClientPage(ByVal pg As Object)
     txtMileage.TabIndex = 11
     cboFuel.TabIndex = 12
     txtVin.TabIndex = 13
+    btnClients.TabIndex = 14
 End Sub
 
 ' Pestaña 1: entrada, servicio y entrega.
@@ -563,6 +567,27 @@ Private Sub FillClientContact()
     FillIfEmpty txtPhone2, phone2
     FillIfEmpty txtEmail, email
     FillIfEmpty txtAddress, address
+End Sub
+
+' Abre el catálogo de clientes. Al elegir uno se reemplaza el contacto con el del catálogo;
+' sin elegir, el combo conserva lo escrito.
+Private Sub btnClients_Click()
+    Dim chosen As String, phone1 As String, phone2 As String, email As String, address As String
+    On Error GoTo Fail
+
+    chosen = PickClient(Trim$(cboClient.Text), True)
+    LoadClientList
+    If Len(chosen) = 0 Then Exit Sub
+
+    cboClient.Text = chosen
+    GetClientContact chosen, phone1, phone2, email, address
+    txtPhone1.Text = phone1
+    txtPhone2.Text = phone2
+    txtEmail.Text = email
+    txtAddress.Text = address
+    Exit Sub
+Fail:
+    ShowError "btnClients_Click"
 End Sub
 
 Private Sub FillIfEmpty(ByVal txt As MSForms.TextBox, ByVal value As String)

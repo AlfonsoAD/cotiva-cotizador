@@ -10,7 +10,7 @@ Attribute VB_Name = "modConfig"
 Option Explicit
 
 ' --- Aplicación ---
-Public Const APP_VERSION As String = "9.0.0"
+Public Const APP_VERSION As String = "9.1.0"
 
 ' --- Nombres de hojas (se conservan en español por compatibilidad con los datos) ---
 Public Const SHEET_HOME As String = "Inicio"

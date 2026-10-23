@@ -41,6 +41,7 @@ Public Function PrepareWorkbook() As Boolean
 
     Application.ScreenUpdating = False
     EnsureWorkbookStructure
+    EnsureHomeClientsButton
     RefreshHomeColors
     If SheetExists(SHEET_COMPANY) Then UnlockSheet ThisWorkbook.Worksheets(SHEET_COMPANY)
     RefreshColorSwatches
