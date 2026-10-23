@@ -42,6 +42,7 @@ Private WithEvents cboTax As MSForms.ComboBox
 Private WithEvents cboHistory As MSForms.ComboBox
 Private WithEvents btnLoad As MSForms.CommandButton
 Private WithEvents btnSwitch As MSForms.CommandButton
+Private WithEvents btnClients As MSForms.CommandButton
 Private WithEvents btnAdd As MSForms.CommandButton
 Private WithEvents btnEdit As MSForms.CommandButton
 Private WithEvents btnDelete As MSForms.CommandButton
@@ -139,7 +140,7 @@ Private Sub BuildLayout()
         .Font.Bold = True
     End With
 
-    Set cboClient = AddComboBox(Me, "c_Client", 116, 94, 400, 22)
+    Set cboClient = AddComboBox(Me, "c_Client", 116, 94, 316, 22)
     With cboClient
         .Style = fmStyleDropDownCombo             ' Se puede escribir un cliente nuevo
         .MatchEntry = fmMatchEntryComplete        ' Completa mientras escribes
@@ -148,6 +149,8 @@ Private Sub BuildLayout()
         .ListRows = 10
         .ControlTipText = TIP_CLIENT
     End With
+    Set btnClients = AddButton(Me, "c_Clients", UI_BTN_CLIENTS, kindSecondary, 438, 94, 78, 22)
+    btnClients.ControlTipText = TIP_CLIENTS
 
     Set txtDate = AddTextBox(Me, "c_Date", 524, 94, 118, 22)
     txtDate.MaxLength = 10
@@ -249,6 +252,7 @@ Private Sub BuildLayout()
     cboHistory.TabIndex = 14
     btnLoad.TabIndex = 15
     btnSwitch.TabIndex = 16
+    btnClients.TabIndex = 17
 End Sub
 
 '==============================================================================
@@ -669,6 +673,19 @@ Private Sub btnSwitch_Click()
     Exit Sub
 Fail:
     ShowError "btnSwitch_Click"
+End Sub
+
+' Abre el catálogo de clientes; el elegido queda en el combo y, sin elegir, se conserva lo escrito.
+Private Sub btnClients_Click()
+    Dim chosen As String
+    On Error GoTo Fail
+
+    chosen = PickClient(Trim$(cboClient.Text), True)
+    LoadClientList
+    If Len(chosen) > 0 Then cboClient.Text = chosen
+    Exit Sub
+Fail:
+    ShowError "btnClients_Click"
 End Sub
 
 Private Sub btnLogo_Click()

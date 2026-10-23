@@ -158,3 +158,13 @@ Public Sub Test_IsValidVin()
     AssertTrue Not IsValidVin("1HGCM 82633A004352"), "espacio interno"
     AssertTrue Not IsValidVin(""), "vacio"
 End Sub
+
+Public Sub Test_IsValidPostalCode()
+    AssertTrue IsValidPostalCode("01000"), "01000"
+    AssertTrue IsValidPostalCode("06600"), "06600"
+    AssertTrue Not IsValidPostalCode("1000"), "4 digitos"
+    AssertTrue Not IsValidPostalCode("010000"), "6 digitos"
+    AssertTrue Not IsValidPostalCode("0100a"), "letra"
+    AssertTrue Not IsValidPostalCode(""), "vacio"
+    AssertTrue Not IsValidPostalCode("01 00"), "espacio"
+End Sub

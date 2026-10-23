@@ -6,7 +6,7 @@ Attribute VB_Name = "modHome"
 '   B2       logo de Cotiva (imagen) o el texto "Cotiva"
 '   B3       regla naranja
 '   B4 / B5  título y subtítulo
-'   B7       botón "Abrir cotizador"
+'   B7       botones "Abrir cotizador" y "Clientes"
 '   B8       nota de primer uso
 '   B10:B12  lo que hace el cotizador
 '   B14      línea separadora
@@ -91,6 +91,7 @@ Public Sub DesignHome(Optional ByVal silent As Boolean = False)
     ws.Rows(6).RowHeight = 16
     ws.Rows(7).RowHeight = 54
     AddOpenButton ws, fontName
+    AddClientsButton ws, fontName
 
     ws.Rows(8).RowHeight = 18
     With ws.Range("B8:C8")
@@ -194,6 +195,12 @@ Private Sub PaintHomeColors(ByVal ws As Worksheet)
             .TextFrame2.TextRange.Font.Fill.ForeColor.RGB = ContrastTextColor(PrimaryColor())
         End With
     End If
+    If ShapeExists(ws, HOME_CLIENTS_BUTTON_NAME) Then
+        With ws.Shapes(HOME_CLIENTS_BUTTON_NAME)
+            .Fill.ForeColor.RGB = SecondaryColor()
+            .TextFrame2.TextRange.Font.Fill.ForeColor.RGB = ContrastTextColor(SecondaryColor())
+        End With
+    End If
     ws.Range("B4").Font.Color = SecondaryColor()
     For r = HOME_FIRST_FEATURE_ROW To HOME_FIRST_FEATURE_ROW + 2
         ws.Range("B" & r).Font.Color = SecondaryColor()
@@ -231,6 +238,39 @@ Private Sub AddOpenButton(ByVal ws As Worksheet, ByVal fontName As String)
             .TextRange.Font.Fill.ForeColor.RGB = ContrastTextColor(PrimaryColor())
         End With
     End With
+End Sub
+
+' Botón "Clientes" (junto al de abrir) con la macro OpenClientsTool.
+Private Sub AddClientsButton(ByVal ws As Worksheet, ByVal fontName As String)
+    Dim btn As Shape
+
+    Set btn = ws.Shapes.AddShape(msoShapeRoundedRectangle, ws.Range("B7").Left + 212, _
+                                 ws.Range("B7").Top + 4, 160, 46)
+    With btn
+        .Name = HOME_CLIENTS_BUTTON_NAME
+        .Fill.ForeColor.RGB = SecondaryColor()
+        .Line.Visible = msoFalse
+        .Placement = xlMove
+        .OnAction = "OpenClientsTool"
+        With .TextFrame2
+            .VerticalAnchor = msoAnchorMiddle
+            .TextRange.Text = HOME_CLIENTS_BUTTON
+            .TextRange.ParagraphFormat.Alignment = msoAlignCenter
+            .TextRange.Font.Bold = msoTrue
+            .TextRange.Font.Size = 13
+            .TextRange.Font.Name = fontName
+            .TextRange.Font.Fill.ForeColor.RGB = ContrastTextColor(SecondaryColor())
+        End With
+    End With
+End Sub
+
+' Agrega el botón "Clientes" si falta (libros de versiones anteriores). La hoja queda
+' desprotegida: quien llama la vuelve a proteger (ProtectAll).
+Public Sub EnsureHomeClientsButton()
+    If Not SheetExists(SHEET_HOME) Then Exit Sub
+    If ShapeExists(HomeSheet(), HOME_CLIENTS_BUTTON_NAME) Then Exit Sub
+    UnlockSheet HomeSheet()
+    AddClientsButton HomeSheet(), BrandFont()
 End Sub
 
 ' Barra de color (la regla bajo el logo): un rectángulo sin borde.
@@ -322,3 +362,4 @@ Private Sub FitLogoInZone(ByVal ws As Worksheet, ByVal logoName As String, _
     shp.Top = zone.Top + (zone.Height - shp.Height) / 2
     shp.Placement = xlMove
 End Sub
+

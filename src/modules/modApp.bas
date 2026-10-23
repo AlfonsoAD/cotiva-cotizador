@@ -41,6 +41,7 @@ Public Function PrepareWorkbook() As Boolean
 
     Application.ScreenUpdating = False
     EnsureWorkbookStructure
+    EnsureHomeClientsButton
     RefreshHomeColors
     If SheetExists(SHEET_COMPANY) Then UnlockSheet ThisWorkbook.Worksheets(SHEET_COMPANY)
     RefreshColorSwatches
@@ -80,6 +81,10 @@ Public Sub EnsureWorkbookStructure()
         EnsureDataHeaders
     End If
 
+    If Not SheetExists(SHEET_TAX_REGIMES) Then AddSheet SHEET_TAX_REGIMES
+    If Not SheetExists(SHEET_CFDI_USES) Then AddSheet SHEET_CFDI_USES
+    EnsureSatCatalogs
+
     EnsureCompanySheet
     UpgradeCompanySheet
 
@@ -92,4 +97,30 @@ Private Function AddSheet(ByVal sheetName As String) As Worksheet
     Set ws = ThisWorkbook.Worksheets.Add(After:=ThisWorkbook.Worksheets(ThisWorkbook.Worksheets.Count))
     ws.Name = sheetName
     Set AddSheet = ws
+End Function
+
+' Macro del boton "Clientes" de Inicio: prepara el libro y abre el catalogo.
+Public Sub OpenClientsTool()
+    If Not PrepareWorkbook() Then Exit Sub
+    PickClient vbNullString, False
+End Sub
+
+' Abre frmClients modal y regresa el cliente elegido, o "" si no eligio.
+' Con pickMode muestra "Usar este cliente"; currentClient es el que se muestra al abrir.
+Public Function PickClient(ByVal currentClient As String, _
+        Optional ByVal pickMode As Boolean = True) As String
+    Dim chosen As String
+
+    On Error GoTo Fail
+    frmClients.Start currentClient, pickMode
+    frmClients.Show vbModal
+    chosen = frmClients.ChosenClient              ' Se lee antes de descargar el formulario
+    PickClient = chosen
+Cleanup:
+    On Error Resume Next
+    Unload frmClients
+    Exit Function
+Fail:
+    ShowError "PickClient"
+    Resume Cleanup
 End Function

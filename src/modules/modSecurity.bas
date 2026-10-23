@@ -52,7 +52,7 @@ Public Function ProtectAll() As Boolean
     End If
 
     ' Hojas de datos: protegidas y (opcionalmente) invisibles
-    For Each sheetName In Array(SHEET_QUOTES, SHEET_ITEMS, SHEET_CLIENTS, SHEET_ORDERS)
+    For Each sheetName In Array(SHEET_QUOTES, SHEET_ITEMS, SHEET_CLIENTS, SHEET_ORDERS, SHEET_TAX_REGIMES, SHEET_CFDI_USES)
         If SheetExists(CStr(sheetName)) Then
             LockSheet ThisWorkbook.Worksheets(CStr(sheetName))
             ' Reasignar .Visible redibuja las pestanas aunque no cambie nada
@@ -95,7 +95,7 @@ Public Sub AdminUnlock()
         Exit Sub
     End If
 
-    For Each sheetName In Array(SHEET_QUOTES, SHEET_ITEMS, SHEET_CLIENTS, SHEET_ORDERS, SHEET_TEMPLATE, SHEET_ORDER_TEMPLATE, SHEET_COMPANY, SHEET_HOME)
+    For Each sheetName In Array(SHEET_QUOTES, SHEET_ITEMS, SHEET_CLIENTS, SHEET_ORDERS, SHEET_TAX_REGIMES, SHEET_CFDI_USES, SHEET_TEMPLATE, SHEET_ORDER_TEMPLATE, SHEET_COMPANY, SHEET_HOME)
         If SheetExists(CStr(sheetName)) Then
             ThisWorkbook.Worksheets(CStr(sheetName)).Visible = xlSheetVisible
             UnlockSheet ThisWorkbook.Worksheets(CStr(sheetName))
