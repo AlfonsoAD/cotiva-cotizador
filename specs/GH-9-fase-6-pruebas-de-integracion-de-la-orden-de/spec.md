@@ -123,5 +123,5 @@ Pendiente tras T9 (reemplaza la revisión del diagnóstico de 1000 caracteres de
 - [x] `build.ps1` compila sin diálogos con la nueva PlantillaOrden (corrido por el implementer: genera dist/Cotiva-Cotizador.xlsm).
 - [x] PDF de una orden con 40 renglones cortos: dos hojas, diagnóstico completo, "Página 1" y "Página 2", condiciones y firmas sin cortar.
 - [x] PDF de una orden con diagnóstico de 1000 caracteres en pocos renglones y de una sin diagnóstico: una hoja, como antes.
-- [ ] En `frmOrder`, un diagnóstico de 41 renglones avisa en su pestaña y no se guarda.
+- [x] En `frmOrder`, un diagnóstico de 41 renglones avisa en su pestaña y no se guarda (verificado por el humano: con 41 avisa y no guarda; con 40 guarda).
 - [x] PDF de la cotización ligada: sigue en una hoja.
