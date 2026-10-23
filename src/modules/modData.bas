@@ -767,10 +767,12 @@ Private Function ReadCatalog(ByVal sheetName As String) As Variant
     ReadCatalog = result
 End Function
 
+' Catalogo de regimenes fiscales del SAT: matriz (0..n-1, 0..1) con clave y descripcion, o Empty si no hay filas.
 Public Function ListTaxRegimes() As Variant
     ListTaxRegimes = ReadCatalog(SHEET_TAX_REGIMES)
 End Function
 
+' Catalogo de usos de CFDI del SAT: matriz (0..n-1, 0..1) con clave y descripcion, o Empty si no hay filas.
 Public Function ListCfdiUses() As Variant
     ListCfdiUses = ReadCatalog(SHEET_CFDI_USES)
 End Function

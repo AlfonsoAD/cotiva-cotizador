@@ -95,6 +95,7 @@ Public Sub Start(ByVal currentClient As String, ByVal pickMode As Boolean)
     End If
 End Sub
 
+' Cliente elegido con "Usar este cliente"; vacio si se cerro sin elegir. Se lee antes de descargar el formulario.
 Public Property Get ChosenClient() As String
     ChosenClient = mChosen
 End Property
