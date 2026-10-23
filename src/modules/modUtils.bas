@@ -172,6 +172,47 @@ Public Function DiagnosisLines(ByVal diagnosisText As String) As Collection
     Set DiagnosisLines = result
 End Function
 
+' Renglones de un texto (vacíos de en medio incluidos, sin los saltos del final).
+Public Function TextLineCount(ByVal text As String) As Long
+    Dim normalized As String
+    normalized = NormalizeLineBreaks(text)
+    Do While Right$(normalized, 1) = vbLf
+        normalized = Left$(normalized, Len(normalized) - 1)
+    Loop
+    If Len(normalized) = 0 Then Exit Function
+    TextLineCount = UBound(Split(normalized, vbLf)) + 1
+End Function
+
+Private Function NormalizeLineBreaks(ByVal text As String) As String
+    NormalizeLineBreaks = Replace(Replace(text, vbCrLf, vbLf), vbCr, vbLf)
+End Function
+
+' Diagnóstico en grupos de ORD_DIAG_LINES_PER_ROW renglones unidos con vbLf, uno por fila de la orden.
+' El último grupo permitido se lleva lo que sobre. Unidos con vbLf dan el texto normalizado.
+Public Function DiagnosisChunks(ByVal diagnosisText As String) As Collection
+    Dim result As New Collection, parts() As String, n As Long
+    Dim g As Long, groupCount As Long, first As Long, last As Long, i As Long, chunk As String
+
+    Set DiagnosisChunks = result
+    n = TextLineCount(diagnosisText)
+    If n = 0 Then Exit Function
+
+    parts = Split(NormalizeLineBreaks(diagnosisText), vbLf)
+    groupCount = (n + ORD_DIAG_LINES_PER_ROW - 1) \ ORD_DIAG_LINES_PER_ROW
+    If groupCount > ORD_DIAG_ROWS Then groupCount = ORD_DIAG_ROWS
+    For g = 1 To groupCount
+        first = (g - 1) * ORD_DIAG_LINES_PER_ROW
+        last = first + ORD_DIAG_LINES_PER_ROW - 1
+        If g = groupCount And g = ORD_DIAG_ROWS Then last = n - 1
+        If last > n - 1 Then last = n - 1
+        chunk = parts(first)
+        For i = first + 1 To last
+            chunk = chunk & vbLf & parts(i)
+        Next i
+        result.Add chunk
+    Next g
+End Function
+
 ' Cotización nueva (sin guardar) con un concepto por renglón del diagnóstico, hasta MAX_ITEMS.
 Public Function QuoteFromOrder(ByVal o As ServiceOrder, ByVal quoteNumber As String) As Quote
     Dim q As Quote, rows As Collection, i As Long

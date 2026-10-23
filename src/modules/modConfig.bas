@@ -10,7 +10,7 @@ Attribute VB_Name = "modConfig"
 Option Explicit
 
 ' --- Aplicación ---
-Public Const APP_VERSION As String = "8.0.0"
+Public Const APP_VERSION As String = "9.0.0"
 
 ' --- Nombres de hojas (se conservan en español por compatibilidad con los datos) ---
 Public Const SHEET_HOME As String = "Inicio"
@@ -79,7 +79,7 @@ Public Const VEHICLE_ROW_HEIGHT As Double = 18          ' Alto del renglón 7 cu
 Public Const VEHICLE_ROW_EMPTY_HEIGHT As Double = 10    ' Alto del renglón 7 vacío (espaciador)
 
 ' --- Plantilla de la orden: área de impresión y celdas de datos ---
-Public Const ORDER_PRINT_AREA As String = "$A$1:$H$29"
+Public Const ORDER_PRINT_AREA As String = "$A$1:$H$36"
 Public Const CELL_ORD_COMPANY_NAME As String = "A2"
 Public Const CELL_ORD_COMPANY_CONTACT As String = "A3"
 Public Const CELL_ORD_COMPANY_ADDRESS As String = "A4"
@@ -107,10 +107,20 @@ Public Const CELL_ORD_OUT As String = "B18"
 Public Const CELL_ORD_DELIVERED_BY As String = "E18"
 Public Const CELL_ORD_REQUESTED As String = "A21"
 Public Const CELL_ORD_DIAGNOSIS As String = "A23"
-Public Const CELL_ORD_TERMS As String = "A26"
-Public Const CELL_ORD_SIGN_CLIENT As String = "A28"
-Public Const CELL_ORD_SIGN_RECEIVED As String = "D28"
-Public Const CELL_ORD_SIGN_DELIVERED As String = "G28"
+' El diagnóstico ocupa de 1 a ORD_DIAG_ROWS filas combinadas; sobra se oculta.
+Public Const ORD_DIAG_FIRST_ROW As Long = 23
+Public Const ORD_DIAG_ROWS As Long = 8
+Public Const ORD_DIAG_LINES_PER_ROW As Long = 5
+Public Const ORD_DIAG_MAX_LINES As Long = ORD_DIAG_ROWS * ORD_DIAG_LINES_PER_ROW
+Public Const ORD_DIAG_MIN_HEIGHT As Double = 96
+' Margen sobre el alto medido: AutoFit mide en pantalla y el PDF queda más alto
+Public Const ORD_DIAG_ROW_PAD As Double = 6
+' Columna fuera del área de impresión donde se mide el alto de cada fila (las combinadas no se autoajustan)
+Public Const ORD_MEASURE_COLUMN As String = "J"
+Public Const CELL_ORD_TERMS As String = "A33"
+Public Const CELL_ORD_SIGN_CLIENT As String = "A35"
+Public Const CELL_ORD_SIGN_RECEIVED As String = "D35"
+Public Const CELL_ORD_SIGN_DELIVERED As String = "G35"
 
 ' --- Logos ---
 Public Const COMPANY_LOGO_NAME As String = "LogoCotizacion"   ' Logo de la empresa que cotiza

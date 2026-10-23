@@ -151,7 +151,7 @@ Private Sub BuildLayout()
 
     ' --- Pestañas ---
     Set mpgMain = Me.Controls.Add("Forms.MultiPage.1", "c_Pages", True)
-    Place mpgMain, FORM_MARGIN, 102, FORM_WIDTH - 2 * FORM_MARGIN, 342
+    Place mpgMain, FORM_MARGIN, 102, FORM_WIDTH - 2 * FORM_MARGIN, 324
     mpgMain.Font.Name = mFont
     mpgMain.Font.Size = 9
     mpgMain.Pages(PAGE_CLIENT).Caption = UI_ORD_TAB_CLIENT
@@ -169,7 +169,7 @@ Private Sub BuildLayout()
     Set btnPdf = AddButton(Me, "c_Pdf", UI_BTN_PDF, kindDark, rightEdge - 100, 460, 100, 26)
 
     ' --- Créditos de innobytes (clic = abrir el sitio) ---
-    Set lblInnobytes = AddLabel(Me, "c_Innobytes", InnobytesCredit(), 250, 467, 180, 12, 8, False, TextGray())
+    Set lblInnobytes = AddLabel(Me, "c_Innobytes", InnobytesCredit(), FORM_MARGIN, 430, 380, 12, 8, False, TextGray())
     lblInnobytes.ControlTipText = Fmt(TIP_INNOBYTES, INNOBYTES_WEB)
     lblInnobytes.MousePointer = fmMousePointerUpArrow
 
@@ -675,6 +675,10 @@ Private Function SyncOrderFromForm() As Boolean
     End If
     If Len(Trim$(txtOutTime.Text)) > 0 And Not IsValidTime(txtOutTime.Text) Then
         WarnOnPage PAGE_SERVICE, MSG_TIME_INVALID, txtOutTime: Exit Function
+    End If
+
+    If TextLineCount(txtDiagnosis.Text) > ORD_DIAG_MAX_LINES Then
+        WarnOnPage PAGE_SERVICE, Fmt(MSG_DIAGNOSIS_TOO_MANY_LINES, ORD_DIAG_MAX_LINES, TextLineCount(txtDiagnosis.Text)), txtDiagnosis: Exit Function
     End If
 
     ' Number y QuoteNumber no se tocan: el folio lo asigna el sistema y la cotización ligada se conserva

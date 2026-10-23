@@ -153,7 +153,7 @@ Public Const TPL_TERMS_TITLE As String = "Condiciones"
 Public Const TPL_TERMS_DEFAULT As String = "Precios en pesos mexicanos (MXN). Esta cotización es válida hasta la fecha de vigencia indicada. Tiempos de entrega sujetos a confirmación al aprobar la cotización."
 Public Const TPL_MADE_WITH As String = "Generado con"
 Public Const TPL_INNOBYTES As String = "Cotiva es un producto de innobytes"
-Public Const TPL_PAGE As String = "Página &P de &N"
+Public Const TPL_PAGE As String = "Página &P"
 Public Const TPL_VEHICLE As String = "Vehículo"
 
 ' --- Plantilla de la orden de servicio ---
@@ -279,3 +279,4 @@ Public Const UI_BTN_ORDER_TO_QUOTE As String = "Pasar a cotización"
 Public Const TIP_ORDER_TO_QUOTE As String = "Guarda la orden y abre su cotización con el diagnóstico como conceptos"
 Public Const MSG_LINKED_QUOTE_MISSING As String = "No se encontró la cotización {0} ligada a esta orden.\nSe creará una nueva con el diagnóstico."
 Public Const MSG_DIAGNOSIS_TRUNCATED As String = "El diagnóstico tiene {0} renglones y la cotización admite {1}.\nLos demás quedan solo en la orden."
+Public Const MSG_DIAGNOSIS_TOO_MANY_LINES As String = "El diagnóstico admite hasta {0} renglones y tiene {1}. Junta o resume renglones."

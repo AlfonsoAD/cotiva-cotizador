@@ -17,8 +17,8 @@ Attribute VB_Name = "modTemplate"
 ' PlantillaOrden (cuadrícula A-H: etiqueta/valor x3; C y F separan):
 '   Fila 1 logo A1:D1 y título   Filas 2-4 empresa y folio/estado/prometida
 '   Filas 6-18 cliente, vehículo, entrada y salida
-'   Filas 20-23 servicio y diagnóstico   A26:H26 condiciones (editable)
-'   Filas 28-29 firmas: Cliente, Recibió, Entregó
+'   Filas 20-22 servicio   Filas 23-30 diagnostico (un grupo de renglones por fila)
+'   A33 condiciones (editable)   Filas 35-36 firmas: Cliente, Recibió, Entregó
 '==============================================================================
 Option Explicit
 
@@ -537,7 +537,7 @@ Public Sub DesignTemplate(Optional ByVal silent As Boolean = False)
     ApplyCompanyColors ws
 
     ' --- 10. Página ---
-    ConfigurePage ws, fontName, PRINT_AREA
+    ConfigurePage ws, fontName, PRINT_AREA, True
 
     FitLogos ws
     LockSheet ws
@@ -557,8 +557,9 @@ Fail:
     Application.ScreenUpdating = True
 End Sub
 
-' Tamaño carta, márgenes, 1 página y pie con número de página.
-Private Sub ConfigurePage(ByVal ws As Worksheet, ByVal fontName As String, ByVal printArea As String)
+' Tamaño carta, márgenes, 1 página de ancho (y de alto si oneTallPage) y pie con número de página.
+Private Sub ConfigurePage(ByVal ws As Worksheet, ByVal fontName As String, ByVal printArea As String, _
+                          ByVal oneTallPage As Boolean)
     ' PrintCommunication=False acelera PageSetup; puede no existir en Excel muy viejo
     On Error Resume Next
     Application.PrintCommunication = False
@@ -578,7 +579,7 @@ Private Sub ConfigurePage(ByVal ws As Worksheet, ByVal fontName As String, ByVal
         .PrintGridlines = False
         .Zoom = False                             ' Necesario para que funcione FitTo...
         .FitToPagesWide = 1
-        .FitToPagesTall = 1
+        If oneTallPage Then .FitToPagesTall = 1 Else .FitToPagesTall = False
         .LeftFooter = "&""" & fontName & ",Regular""&8&K62666D" & TPL_PAGE
         .RightFooter = ""
     End With
@@ -666,7 +667,7 @@ Public Sub FillOrderTemplate(ByVal o As ServiceOrder)
     PutOrderText ws, CELL_ORD_DELIVERED_BY, o.DeliveredBy
 
     PutOrderText ws, CELL_ORD_REQUESTED, o.Requested
-    PutOrderText ws, CELL_ORD_DIAGNOSIS, o.Diagnosis
+    FillOrderDiagnosis ws, o.Diagnosis
 
     PutOrderText ws, CELL_ORD_SIGN_CLIENT, o.ClientName
     PutOrderText ws, CELL_ORD_SIGN_RECEIVED, o.ReceivedBy
@@ -689,6 +690,38 @@ Private Sub ClearOrderContent(ByVal ws As Worksheet)
     For Each cellAddress In OrderDataCells()
         ws.Range(CStr(cellAddress)).MergeArea.ClearContents
     Next cellAddress
+    ws.Range("A" & ORD_DIAG_FIRST_ROW & ":H" & (ORD_DIAG_FIRST_ROW + ORD_DIAG_ROWS - 1)).ClearContents
+End Sub
+
+' El diagnóstico va en grupos de renglones, uno por fila combinada. Cada fila se mide en la
+' columna auxiliar con AutoFit (las combinadas no se autoajustan); las filas sin grupo se ocultan.
+Private Sub FillOrderDiagnosis(ByVal ws As Worksheet, ByVal diagnosisText As String)
+    Dim chunks As Collection, i As Long, r As Long, lastRow As Long, chunk As String, fitted As Double
+
+    lastRow = ORD_DIAG_FIRST_ROW + ORD_DIAG_ROWS - 1
+    ws.Rows(ORD_DIAG_FIRST_ROW & ":" & lastRow).Hidden = False
+    ws.Range("A" & ORD_DIAG_FIRST_ROW & ":H" & lastRow).ClearContents
+    Set chunks = DiagnosisChunks(diagnosisText)
+
+    For i = 1 To ORD_DIAG_ROWS
+        r = ORD_DIAG_FIRST_ROW + i - 1
+        If i <= chunks.Count Then
+            chunk = SafeCellText(CStr(chunks(i)))
+            ws.Range("A" & r).Value = chunk
+            ws.Range(ORD_MEASURE_COLUMN & r).Value = chunk
+            ws.Rows(r).AutoFit
+            fitted = ws.Rows(r).RowHeight + ORD_DIAG_ROW_PAD
+            ws.Range(ORD_MEASURE_COLUMN & r).ClearContents
+            ws.Rows(r).RowHeight = fitted           ' Si no, la fila se reajusta al vaciar la medición
+        ElseIf i > 1 Then
+            ws.Rows(r).Hidden = True
+        End If
+    Next i
+    If chunks.Count = 0 Then
+        ws.Rows(ORD_DIAG_FIRST_ROW).RowHeight = ORD_DIAG_MIN_HEIGHT        ' Si no, conserva el alto de la orden anterior
+    ElseIf chunks.Count = 1 And ws.Rows(ORD_DIAG_FIRST_ROW).RowHeight < ORD_DIAG_MIN_HEIGHT Then
+        ws.Rows(ORD_DIAG_FIRST_ROW).RowHeight = ORD_DIAG_MIN_HEIGHT
+    End If
 End Sub
 
 ' Pinta la PlantillaOrden con el color principal de la empresa (título y línea).
@@ -761,6 +794,21 @@ Private Sub AddOrderTextBlock(ByVal ws As Worksheet, ByVal blockRow As Long, ByV
         .VerticalAlignment = xlTop
         .HorizontalAlignment = xlLeft
         .Font.Size = 10
+    End With
+End Sub
+
+' Columna de medición: mismo ancho de letra que el diagnóstico y 95 % de su ancho, para que el
+' alto medido en pantalla deje holgura al imprimir.
+Private Sub SetupMeasureColumn(ByVal ws As Worksheet)
+    Dim blockWidth As Double, col As Range
+    blockWidth = ws.Range("A" & ORD_DIAG_FIRST_ROW & ":H" & ORD_DIAG_FIRST_ROW).Width
+    Set col = ws.Columns(ORD_MEASURE_COLUMN)
+    col.ColumnWidth = 10
+    col.ColumnWidth = 0.95 * blockWidth * col.ColumnWidth / col.Width
+    With ws.Range(ORD_MEASURE_COLUMN & ORD_DIAG_FIRST_ROW & ":" & ORD_MEASURE_COLUMN & (ORD_DIAG_FIRST_ROW + ORD_DIAG_ROWS - 1))
+        .WrapText = True
+        .Font.Size = 10
+        .VerticalAlignment = xlTop
     End With
 End Sub
 
@@ -886,13 +934,17 @@ Public Sub DesignOrderTemplate(Optional ByVal silent As Boolean = False)
     AddOrderSection ws, 20, TPL_ORD_SEC_REQUESTED
     AddOrderTextBlock ws, 21, 48
     AddOrderSection ws, 22, TPL_ORD_SEC_DIAGNOSIS
-    AddOrderTextBlock ws, 23, 96
-    ws.Rows(24).RowHeight = 8
+    For r = ORD_DIAG_FIRST_ROW To ORD_DIAG_FIRST_ROW + ORD_DIAG_ROWS - 1
+        AddOrderTextBlock ws, CLng(r), ORD_DIAG_MIN_HEIGHT
+        If r > ORD_DIAG_FIRST_ROW Then ws.Rows(CLng(r)).Hidden = True
+    Next r
+    ws.Rows(ORD_DIAG_FIRST_ROW + ORD_DIAG_ROWS).RowHeight = 8
+    SetupMeasureColumn ws
 
     ' --- 7. Condiciones (editables aunque la hoja esté protegida) ---
-    AddOrderSection ws, 25, TPL_ORD_SEC_TERMS
-    AddOrderTextBlock ws, 26, 48
-    With ws.Range("A26:H26")
+    AddOrderSection ws, 32, TPL_ORD_SEC_TERMS
+    AddOrderTextBlock ws, 33, 48
+    With ws.Range("A33:H33")
         .Locked = False
         .Value = TPL_ORD_TERMS_DEFAULT
         .Font.Size = 9
@@ -900,11 +952,11 @@ Public Sub DesignOrderTemplate(Optional ByVal silent As Boolean = False)
     End With
 
     ' --- 8. Firmas ---
-    ws.Rows(27).RowHeight = 40
-    ws.Rows(28).RowHeight = 16
-    ws.Rows(29).RowHeight = 14
+    ws.Rows(34).RowHeight = 40
+    ws.Rows(35).RowHeight = 16
+    ws.Rows(36).RowHeight = 14
     For Each r In Array("A", "D", "G")
-        With ws.Range(CStr(r) & "28:" & Chr$(Asc(CStr(r)) + 1) & "28")
+        With ws.Range(CStr(r) & "35:" & Chr$(Asc(CStr(r)) + 1) & "35")
             .Merge
             .HorizontalAlignment = xlCenter
             .VerticalAlignment = xlCenter
@@ -913,20 +965,20 @@ Public Sub DesignOrderTemplate(Optional ByVal silent As Boolean = False)
             .Borders(xlEdgeTop).Weight = xlThin
             .Borders(xlEdgeTop).Color = TextGray()
         End With
-        With ws.Range(CStr(r) & "29:" & Chr$(Asc(CStr(r)) + 1) & "29")
+        With ws.Range(CStr(r) & "36:" & Chr$(Asc(CStr(r)) + 1) & "36")
             .Merge
             .HorizontalAlignment = xlCenter
             .Font.Size = 8
             .Font.Color = TextGray()
         End With
     Next r
-    ws.Range("A29").Value = TPL_CLIENT
-    ws.Range("D29").Value = TPL_ORD_RECEIVED_BY
-    ws.Range("G29").Value = TPL_ORD_DELIVERED_BY
+    ws.Range("A36").Value = TPL_CLIENT
+    ws.Range("D36").Value = TPL_ORD_RECEIVED_BY
+    ws.Range("G36").Value = TPL_ORD_DELIVERED_BY
 
     ' --- 9. Colores de la empresa y página ---
     ApplyOrderColors ws
-    ConfigurePage ws, fontName, ORDER_PRINT_AREA
+    ConfigurePage ws, fontName, ORDER_PRINT_AREA, False
 
     LockSheet ws
     Application.Goto ws.Range("A1")           ' Para apagar la cuadrícula de la ventana
