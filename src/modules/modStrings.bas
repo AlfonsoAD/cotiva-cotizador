@@ -153,7 +153,7 @@ Public Const TPL_TERMS_TITLE As String = "Condiciones"
 Public Const TPL_TERMS_DEFAULT As String = "Precios en pesos mexicanos (MXN). Esta cotización es válida hasta la fecha de vigencia indicada. Tiempos de entrega sujetos a confirmación al aprobar la cotización."
 Public Const TPL_MADE_WITH As String = "Generado con"
 Public Const TPL_INNOBYTES As String = "Cotiva es un producto de innobytes"
-Public Const TPL_PAGE As String = "Página &P de &N"
+Public Const TPL_PAGE As String = "Página &P"
 Public Const TPL_VEHICLE As String = "Vehículo"
 
 ' --- Plantilla de la orden de servicio ---
