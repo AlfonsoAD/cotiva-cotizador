@@ -44,14 +44,14 @@ Carril light: los nombres y el mapa de la hoja van en Tasks.
 
 ## Tasks
 
-- [ ] **T1 · Vehículo en el PDF de la cotización**
+- [x] **T1 · Vehículo en el PDF de la cotización**
   - `modUtils`: nueva `Public Function VehicleText(ByVal o As ServiceOrder) As String`. Regresa «Marca Modelo Año · Placas X», omite las partes vacías (año 0 = sin año, placas en mayúsculas) y regresa "" si `o Is Nothing` o si todo está vacío. `OrderBannerText` la usa en vez de su ciclo, sin cambiar su salida: las pruebas `Test_OrderBannerText_*` deben seguir pasando.
   - `modConfig`: `CELL_VEHICLE_LABEL = "A7"`, `CELL_VEHICLE = "B7"`, `VEHICLE_ROW_HEIGHT = 18`. `modStrings`: `TPL_VEHICLE = "Vehículo"`.
   - `DesignTemplate`: el renglón 7 sigue con 10 pt; A7 con el mismo formato que A6 (9 pt, gris, centrado vertical) y B7:D7 combinada (10 pt, ShrinkToFit, centrado vertical).
   - `ClearTemplateContent` limpia A7 y B7 y deja el renglón 7 en 10 pt. `FillTemplate`: si `q.OrderNumber` no está vacío, `LoadOrder` y `VehicleText`. Con texto, escribe `TPL_VEHICLE` en A7, el texto en B7 y pone el renglón en `VEHICLE_ROW_HEIGHT`.
   - Criterios: CUANDO la cotización tiene una orden ligada con vehículo, el PDF DEBE mostrar «Vehículo» y «Lincoln MKX 2010 · Placas ABC123» en el renglón 7, sin mover las filas 8 a 34. CUANDO no tiene orden, la orden no existe o no tiene vehículo ni placas, el renglón 7 DEBE quedar vacío y con 10 pt. CUANDO se carga otra cotización o se empieza una nueva, el vehículo anterior NO DEBE quedarse en la hoja.
 
-- [ ] **T2 · Hoja `PlantillaOrden`: diseño**
+- [x] **T2 · Hoja `PlantillaOrden`: diseño**
   - `modConfig`: `SHEET_ORDER_TEMPLATE = "PlantillaOrden"`, `ORDER_PRINT_AREA = "$A$1:$H$29"` y una `CELL_ORD_*` por cada celda de datos del mapa. `modStrings`: `TPL_ORD_*` para el título «ORDEN DE SERVICIO», las secciones, las etiquetas, los pies de firma y `TPL_ORD_TERMS_DEFAULT`. El texto por defecto de las condiciones es genérico para cualquier taller y no nombra a ninguno: el taller no responde por objetos dejados en el vehículo, los trabajos extra se hacen solo con autorización del cliente, y los tiempos y montos son estimados. `MSG_ORDER_DESIGN_CONFIRM` y `MSG_ORDER_DESIGN_DONE`, si hacen falta textos distintos de los de la cotización.
   - Columnas: A, D y G (etiquetas) de 11; B, E y H (valores) de 19; C y F de 2.
   - Mapa:
@@ -80,13 +80,13 @@ Carril light: los nombres y el mapa de la hoja van en Tasks.
   - `EnsureWorkbookStructure` crea la hoja y llama `DesignOrderTemplate True` si no existe. `ProtectAll` agrega `SHEET_ORDER_TEMPLATE` a las hojas visibles protegidas.
   - Criterios: CUANDO se arma el build o se abre un libro de una versión anterior, DEBE existir `PlantillaOrden` protegida, en carta y a una página. Solo A26:H26 DEBE poder editarse con la hoja protegida. CUANDO se rediseña con `DesignOrderTemplate`, el texto de las condiciones DEBE volver al de `TPL_ORD_TERMS_DEFAULT`.
 
-- [ ] **T3 · Llenado, logo y PDF de la orden**
+- [x] **T3 · Llenado, logo y PDF de la orden**
   - `Public Sub FillOrderTemplate(ByVal o As ServiceOrder)`: limpia solo las celdas de datos, nunca las condiciones. Escribe empresa, folio, estado, cliente, vehículo, entrada y salida, servicio, diagnóstico y los nombres de las firmas, todo con `SafeCellText`. Las fechas 0 quedan en blanco. Formatos: fecha `dd mmm yyyy`, hora `hh:mm`, kilometraje `#,##0 "km"` (0 = vacío), año vacío si es 0. Luego aplica los colores de la empresa y llama `SyncOrderLogo`. Maneja errores igual que `FillTemplate`.
   - `Private Sub SyncOrderLogo(ByVal ws As Worksheet)`: borra el `COMPANY_LOGO_NAME` de `PlantillaOrden`. Si `Plantilla` tiene logo, lo copia, lo nombra `COMPANY_LOGO_NAME` y lo acomoda en A1:D1 conservando la proporción, como `FitLogos`. Restaura la hoja activa. Si el pegado falla, sigue sin logo y sin mostrar error.
   - `Public Function ExportOrderPdf(ByVal o As ServiceOrder) As String`: hace lo mismo que `ExportPdf` sobre `PlantillaOrden`, con `PdfFolder()` y `SanitizeFileName(o.Number & "_" & o.ClientName) & ".pdf"`. Pregunta si el archivo ya existe y regresa la ruta, o "" si no se generó.
   - Criterios: CUANDO se exporta una orden, el sistema DEBE generar `[Folio]_[Cliente].pdf` de una página carta con los datos de la orden y el logo de la empresa, si hay. CUANDO un campo está vacío, su celda DEBE quedar en blanco, sin «0», «00:00» ni «0 km». Las condiciones editadas a mano NO DEBEN borrarse al llenar otra orden.
 
-- [ ] **T4 · Botón «Generar PDF» en `frmOrder`**
+- [x] **T4 · Botón «Generar PDF» en `frmOrder`**
   - Mover `ConfirmCompanyData` de `frmQuote` a `modTemplate` como `Public Function ConfirmCompanyData() As Boolean`, sin cambiar lo que hace, y hacer que `frmQuote` llame a esa.
   - `frmOrder`: `btnPdf` (`UI_BTN_PDF`, `kindDark`) en la barra inferior, a la derecha. «Guardar» se recorre a su izquierda y el crédito de innobytes se angosta para que nada se encime. El orden del tabulador sigue siendo coherente.
   - `btnPdf_Click`: `SyncOrderFromForm`. Si hay cambios o la orden no se ha guardado, pregunta `MSG_SAVE_ORDER_BEFORE_PDF` (nuevo, «La orden tiene cambios sin guardar…»; Sí guarda, No sigue, Cancelar sale). Luego `ConfirmCompanyData`, `FillOrderTemplate mOrder`, `ExportOrderPdf mOrder` y `MSG_PDF_CREATED`. Errores con `ShowError "btnPdf_Click"`.

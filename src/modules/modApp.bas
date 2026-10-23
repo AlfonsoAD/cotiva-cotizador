@@ -64,6 +64,10 @@ Public Sub EnsureWorkbookStructure()
         AddSheet SHEET_TEMPLATE
         DesignTemplate True
     End If
+    If Not SheetExists(SHEET_ORDER_TEMPLATE) Then
+        AddSheet SHEET_ORDER_TEMPLATE
+        DesignOrderTemplate True
+    End If
     If Not SheetExists(SHEET_QUOTES) Then AddSheet SHEET_QUOTES
     If Not SheetExists(SHEET_ITEMS) Then AddSheet SHEET_ITEMS
     If Not SheetExists(SHEET_ORDERS) Then AddSheet SHEET_ORDERS

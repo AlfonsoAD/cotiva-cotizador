@@ -645,26 +645,6 @@ Fail:
     ShowError "btnPdf_Click"
 End Sub
 
-' Antes del PDF: avisa si falta el nombre de la empresa o el RFC es inválido.
-' Regresa True si se puede continuar.
-Private Function ConfirmCompanyData() As Boolean
-    Dim warning As String, rfc As String
-
-    rfc = CompanyValue(COMPANY_RFC_CELL)
-    If Len(CompanyValue(COMPANY_NAME_CELL)) = 0 Then
-        warning = MSG_COMPANY_NAME_MISSING
-    ElseIf Len(rfc) > 0 And Not IsValidRfc(rfc) Then
-        warning = Fmt(MSG_COMPANY_RFC_INVALID, rfc)
-    End If
-
-    If Len(warning) = 0 Then
-        ConfirmCompanyData = True
-    Else
-        ConfirmCompanyData = (MsgBox(Fmt(MSG_COMPANY_CONTINUE, warning), _
-                                     vbYesNo + vbExclamation, TTL_COMPANY) = vbYes)
-    End If
-End Function
-
 Private Sub btnNew_Click()
     On Error GoTo Fail
     If mIsDirty Then

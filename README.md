@@ -20,7 +20,7 @@ src/
     modFormKit     Helpers de maquetado de formularios (los usan frmQuote y frmOrder)
     modData        Capa de datos (lo único a cambiar para migrar a SQLite/API)
     modCompany     Hoja "Mi empresa": datos del emisor, vigencia, colores
-    modTemplate    Plantilla: diseño, llenado, logos y PDF
+    modTemplate    Plantilla y PlantillaOrden: diseño, llenado, logos y PDF
     modHome        Hoja "Inicio": portada, botón y logos de Cotiva e innobytes
     modSecurity    Protección del libro y macros de administrador
     modSecrets.example.bas   Plantilla de la clave (modSecrets.bas NO se sube)
@@ -91,7 +91,8 @@ error en `LastErrorNumber`/`LastErrorWhere`. `modTestHelpers` tiene datos de eje
 versiones anteriores por código. Un error sin manejar dentro de una prueba cuenta como falla.
 
 **Sigue siendo manual:** formularios, PDF, apariencia y los `MsgBox` que no pasan por `ShowError`
-(contraseña, diseño, PDF). `src/tests/` no entra al `.xlsm` que se entrega.
+(contraseña, diseño, PDF). Revisa a mano el PDF de una orden completa y de una casi vacía, y el
+renglón «Vehículo» (renglón 7) en el PDF de una cotización con orden ligada y sin ella. `src/tests/` no entra al `.xlsm` que se entrega.
 
 ## Flujo de trabajo
 
@@ -141,6 +142,7 @@ Git, pero dentro del `.xlsm` solo la protege la contraseña del proyecto VBA.
 | `AdminUnlock` | Pide la clave y deja todas las hojas visibles y editables |
 | `AdminLock` | Vuelve a proteger todo |
 | `DesignTemplate` | Rediseña la Plantilla (conserva logos) |
+| `DesignOrderTemplate` | Rediseña la PlantillaOrden del PDF de la orden (las condiciones vuelven al texto original; el logo se toma de la Plantilla) |
 | `DesignHome` | Rediseña la pantalla de Inicio (conserva logos) |
 | `InsertCotivaLogo` | Cambia el logo de Cotiva del pie de la cotización |
 | `InsertHomeCotivaLogo` | Cambia el logo de Cotiva de la pantalla de Inicio |
