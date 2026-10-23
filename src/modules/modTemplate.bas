@@ -17,8 +17,8 @@ Attribute VB_Name = "modTemplate"
 ' PlantillaOrden (cuadrícula A-H: etiqueta/valor x3; C y F separan):
 '   Fila 1 logo A1:D1 y título   Filas 2-4 empresa y folio/estado/prometida
 '   Filas 6-18 cliente, vehículo, entrada y salida
-'   Filas 20-23 servicio y diagnóstico   A26:H26 condiciones (editable)
-'   Filas 28-29 firmas: Cliente, Recibió, Entregó
+'   Filas 20-22 servicio   Filas 23-30 diagnostico (un grupo de renglones por fila)
+'   A33 condiciones (editable)   Filas 35-36 firmas: Cliente, Recibió, Entregó
 '==============================================================================
 Option Explicit
 
@@ -717,7 +717,11 @@ Private Sub FillOrderDiagnosis(ByVal ws As Worksheet, ByVal diagnosisText As Str
             ws.Rows(r).Hidden = True
         End If
     Next i
-    If chunks.Count <= 1 And ws.Rows(ORD_DIAG_FIRST_ROW).RowHeight < ORD_DIAG_MIN_HEIGHT Then ws.Rows(ORD_DIAG_FIRST_ROW).RowHeight = ORD_DIAG_MIN_HEIGHT
+    If chunks.Count = 0 Then
+        ws.Rows(ORD_DIAG_FIRST_ROW).RowHeight = ORD_DIAG_MIN_HEIGHT        ' Si no, conserva el alto de la orden anterior
+    ElseIf chunks.Count = 1 And ws.Rows(ORD_DIAG_FIRST_ROW).RowHeight < ORD_DIAG_MIN_HEIGHT Then
+        ws.Rows(ORD_DIAG_FIRST_ROW).RowHeight = ORD_DIAG_MIN_HEIGHT
+    End If
 End Sub
 
 ' Pinta la PlantillaOrden con el color principal de la empresa (título y línea).

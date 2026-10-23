@@ -163,6 +163,8 @@ Public Sub Test_Integracion_DiagnosticoCortoOcultaSobrantes()
     Next r
     AssertEqual ShortLines(2), DiagnosisFromSheet(ws), "dos renglones"
     AssertEqual ORD_DIAG_MIN_HEIGHT, CDbl(ws.Rows(ORD_DIAG_FIRST_ROW).RowHeight), "alto minimo"
+    o.Diagnosis = ShortLines(ORD_DIAG_MAX_LINES)
+    FillOrderTemplate o
     o.Diagnosis = ""
     FillOrderTemplate o
     AssertEqual "", CStr(ws.Range(CELL_ORD_DIAGNOSIS).Value), "sin diagnostico"
@@ -206,6 +208,9 @@ Public Sub Test_Integracion_HojasProtegidasTrasFlujo()
     FillTemplate q
     FillOrderTemplate LoadOrder("OS-0001")
     AssertEqual 0, LastErrorNumber(), "sin error"
+    For Each n In Array(SHEET_TEMPLATE, SHEET_ORDER_TEMPLATE)
+        AssertTrue ThisWorkbook.Worksheets(CStr(n)).ProtectContents, CStr(n) & " protegida tras el flujo"
+    Next n
     AssertTrue ProtectAll(), "ProtectAll"
     For Each n In Array(SHEET_TEMPLATE, SHEET_ORDER_TEMPLATE, SHEET_QUOTES, SHEET_ITEMS, SHEET_CLIENTS, SHEET_ORDERS)
         If SheetExists(CStr(n)) Then
