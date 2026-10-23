@@ -57,6 +57,15 @@ dist/          Salida del build (ignorada por Git)
 
 Los colores de B11 (principal) y B12 (secundario) de la hoja "Mi empresa" se aplican al formulario, a la portada (Inicio) y a la propia hoja "Mi empresa". La portada y la hoja se repintan al pulsar **Abrir cotizador**. Si B11 o B12 están vacías o no son un hexadecimal válido, se usan los colores de Cotiva.
 
+### Pasar la orden a cotización
+
+En la orden, el botón **Pasar a cotización** guarda la orden (con las mismas validaciones que **Guardar**) y abre su cotización.
+
+- Se crea una cotización con el cliente de la orden y un concepto por cada renglón del diagnóstico (cantidad 1, precio $0.00 para que lo captures). Los renglones se separan por salto de línea; las viñetas se conservan.
+- La cotización admite hasta 17 conceptos: si el diagnóstico tiene más, avisa y los demás quedan solo en la orden. Cada concepto se corta a 255 caracteres.
+- Si la orden ya tiene cotización, se abre esa misma, con los precios que ya le pusiste; el diagnóstico no se vuelve a copiar. Si ese folio ya no existe, avisa y crea uno nuevo.
+- La cotización muestra una franja con la orden, el vehículo y las placas; desaparece en una cotización sin orden.
+
 ## Pruebas automáticas
 
 ```powershell

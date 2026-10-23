@@ -241,3 +241,9 @@ Public Const TTL_NEW_ORDER As String = "Nueva orden"
 Public Const TTL_CLOSE_ORDER As String = "Cerrar orden"
 Public Const UI_ORDER_BANNER As String = "Orden {0}"
 Public Const UI_ORDER_BANNER_PLATES As String = "Placas {0}"
+Public Const UI_BTN_ORDER_TO_QUOTE As String = "Pasar a cotización"
+Public Const TIP_ORDER_TO_QUOTE As String = "Guarda la orden y abre su cotización con el diagnóstico como conceptos"
+Public Const MSG_LINKED_QUOTE_MISSING As String = "No se encontró la cotización {0} ligada a esta orden.
+Se creará una nueva con el diagnóstico."
+Public Const MSG_DIAGNOSIS_TRUNCATED As String = "El diagnóstico tiene {0} renglones y la cotización admite {1}.
+Los demás quedan solo en la orden."

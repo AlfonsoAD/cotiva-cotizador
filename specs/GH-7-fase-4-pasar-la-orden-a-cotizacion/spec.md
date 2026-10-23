@@ -169,7 +169,7 @@ End Sub
 
 ## Tasks
 
-- [ ] **T1 · Contrato: funciones puras y pruebas** (R7-R11, R13, R14, R18): `MAX_ITEM_DESCRIPTION` en `modConfig`; `DiagnosisLines`, `QuoteFromOrder` y `OrderBannerText` en `modUtils` con las firmas de Design, ya implementadas; `UI_ORDER_BANNER` y `UI_ORDER_BANNER_PLATES` en `modStrings`. `src/tests/modTestOrderQuote.bas` con todas las pruebas de abajo; las de `CreateQuoteForOrder` pueden fallar hasta T2. Pruebas:
+- [x] **T1 · Contrato: funciones puras y pruebas** (R7-R11, R13, R14, R18): `MAX_ITEM_DESCRIPTION` en `modConfig`; `DiagnosisLines`, `QuoteFromOrder` y `OrderBannerText` en `modUtils` con las firmas de Design, ya implementadas; `UI_ORDER_BANNER` y `UI_ORDER_BANNER_PLATES` en `modStrings`. `src/tests/modTestOrderQuote.bas` con todas las pruebas de abajo; las de `CreateQuoteForOrder` pueden fallar hasta T2. Pruebas:
   - `Test_DiagnosisLines_PartePorSaltos`: «  Balatas \r\n\r\nDisco\nAceite\rFiltro » → «Balatas», «Disco», «Aceite», «Filtro».
   - `Test_DiagnosisLines_SinSaltosUnRenglon`: «Afinación mayor» → 1 renglón.
   - `Test_DiagnosisLines_VacioSinRenglones`: «» y «  \r\n  » → `Count = 0`.
@@ -185,10 +185,10 @@ End Sub
   - `Test_CreateQuoteForOrder_ReemplazaFolioPerdido`: orden con `QuoteNumber = "COT-1050"`, que no existe → regresa «COT-1001» y la orden guardada apunta a «COT-1001».
   - `Test_CreateQuoteForOrder_DiagnosticoVacio`: diagnóstico «» → cotización guardada con `ItemCount = 0`.
   - `Test_CreateQuoteForOrder_NothingRegresaVacio`: `CreateQuoteForOrder(Nothing) = ""` y `QuoteExists("COT-1001") = False`.
-- [ ] **T2 · Liga en `modData`** (R2, R4, R5): `CreateQuoteForOrder` y `DeleteQuote` privada, con la reversión de Design. Las 15 pruebas de T1 pasan en `test.ps1`.
-- [ ] **T3 · `frmQuote`: franja y `OpenQuote`** (R12, R14-R17): `lblOrderBanner`, `RefreshOrderBanner` en `StartNewQuote` y `ShowSavedQuote`, `btnLoad_Click` refactorizado sobre `ShowSavedQuote`, `OpenQuote` público y `modApp.ShowQuoteFormWith`. «Cargar» funciona igual que antes y además muestra u oculta la franja.
-- [ ] **T4 · `frmOrder`: «Pasar a cotización»** (R1-R4, R6, R9, R18): `btnToQuote` con su posición, tooltip y orden de tabulación, `btnToQuote_Click` en el orden de Design y los textos `UI_BTN_ORDER_TO_QUOTE`, `TIP_ORDER_TO_QUOTE`, `MSG_LINKED_QUOTE_MISSING` y `MSG_DIAGNOSIS_TRUNCATED`.
-- [ ] **T5 · Documentación y verificación manual** (R1, R3, R4, R6, R9, R12, R15, R17): una sección en `README.md` sobre cómo pasar la orden a cotización (qué se copia, qué pasa si ya tiene cotización y el tope de 17 conceptos). Prueba manual en Excel después del build:
+- [x] **T2 · Liga en `modData`** (R2, R4, R5): `CreateQuoteForOrder` y `DeleteQuote` privada, con la reversión de Design. Las 15 pruebas de T1 pasan en `test.ps1`.
+- [x] **T3 · `frmQuote`: franja y `OpenQuote`** (R12, R14-R17): `lblOrderBanner`, `RefreshOrderBanner` en `StartNewQuote` y `ShowSavedQuote`, `btnLoad_Click` refactorizado sobre `ShowSavedQuote`, `OpenQuote` público y `modApp.ShowQuoteFormWith`. «Cargar» funciona igual que antes y además muestra u oculta la franja.
+- [x] **T4 · `frmOrder`: «Pasar a cotización»** (R1-R4, R6, R9, R18): `btnToQuote` con su posición, tooltip y orden de tabulación, `btnToQuote_Click` en el orden de Design y los textos `UI_BTN_ORDER_TO_QUOTE`, `TIP_ORDER_TO_QUOTE`, `MSG_LINKED_QUOTE_MISSING` y `MSG_DIAGNOSIS_TRUNCATED`.
+- [x] **T5 · Documentación y verificación manual** (R1, R3, R4, R6, R9, R12, R15, R17): una sección en `README.md` sobre cómo pasar la orden a cotización (qué se copia, qué pasa si ya tiene cotización y el tope de 17 conceptos). Prueba manual en Excel después del build:
   - Una orden nueva válida con diagnóstico de 3 renglones abre `frmQuote` con 3 conceptos en $0.00, la franja completa y `frmOrder` cerrado.
   - Una orden inválida (sin kilometraje) avisa y no abre nada.
   - Pasar de nuevo la misma orden abre la misma cotización, con los precios que ya se le pusieron.
