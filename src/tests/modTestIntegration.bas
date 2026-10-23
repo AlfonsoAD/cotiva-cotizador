@@ -233,5 +233,5 @@ Public Sub Test_Integracion_PiePaginaSinTotal()
 End Sub
 
 Public Sub Test_Integracion_VersionApp()
-    AssertEqual "9.0.0", APP_VERSION
+    AssertEqual "9.1.0", APP_VERSION
 End Sub

@@ -37,6 +37,7 @@ Public Sub BuildWorkbook(ByVal assetsFolder As String)
     If Len(Dir$(assetsFolder & "\" & FORM_LOGO_FILE)) > 0 Then
         AddFormLogo "frmQuote", assetsFolder & "\" & FORM_LOGO_FILE
         AddFormLogo "frmOrder", assetsFolder & "\" & FORM_LOGO_FILE
+        AddFormLogo "frmClients", assetsFolder & "\" & FORM_LOGO_FILE
     End If
 
     ' 4) Portada
