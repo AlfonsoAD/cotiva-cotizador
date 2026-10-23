@@ -11,6 +11,57 @@ Private Function OrderWithDiagnosis(ByVal diagnosisText As String) As ServiceOrd
     Set OrderWithDiagnosis = o
 End Function
 
+Private Function NumberedLines(ByVal n As Long) As String
+    Dim i As Long, t As String
+    For i = 1 To n
+        If i > 1 Then t = t & vbLf
+        t = t & "R" & i
+    Next i
+    NumberedLines = t
+End Function
+
+Private Function JoinChunks(ByVal c As Collection) As String
+    Dim i As Long
+    For i = 1 To c.Count
+        If i > 1 Then JoinChunks = JoinChunks & vbLf
+        JoinChunks = JoinChunks & c(i)
+    Next i
+End Function
+
+Public Sub Test_TextLineCount_CuentaRenglones()
+    AssertEqual 0, TextLineCount(""), "vacio"
+    AssertEqual 1, TextLineCount("a"), "uno"
+    AssertEqual 2, TextLineCount("a" & vbCrLf & "b"), "crlf"
+    AssertEqual 3, TextLineCount("a" & vbLf & vbLf & "b"), "vacio de en medio"
+    AssertEqual 1, TextLineCount("a" & vbLf), "salto final"
+End Sub
+
+Public Sub Test_DiagnosisChunks_CincoPorFila()
+    Dim c As Collection, t As String
+    t = NumberedLines(12)
+    Set c = DiagnosisChunks(t)
+    AssertEqual 3, c.Count, "tres grupos"
+    If c.Count <> 3 Then Exit Sub
+    AssertEqual 5, TextLineCount(c(1)), "grupo 1"
+    AssertEqual 5, TextLineCount(c(2)), "grupo 2"
+    AssertEqual 2, TextLineCount(c(3)), "grupo 3"
+    AssertEqual t, JoinChunks(c), "unidos dan el texto"
+End Sub
+
+Public Sub Test_DiagnosisChunks_UltimaFilaTomaElResto()
+    Dim c As Collection, t As String
+    t = NumberedLines(45)
+    Set c = DiagnosisChunks(t)
+    AssertEqual ORD_DIAG_ROWS, c.Count, "ocho grupos"
+    If c.Count <> ORD_DIAG_ROWS Then Exit Sub
+    AssertEqual 10, TextLineCount(c(ORD_DIAG_ROWS)), "el ultimo toma el resto"
+    AssertEqual t, JoinChunks(c), "unidos dan el texto"
+End Sub
+
+Public Sub Test_DiagnosisChunks_Vacio()
+    AssertEqual 0, DiagnosisChunks("").Count, "sin grupos"
+End Sub
+
 Public Sub Test_DiagnosisLines_PartePorSaltos()
     Dim c As Collection
     Set c = DiagnosisLines("  Balatas " & vbCrLf & vbCrLf & "Disco" & vbLf & "Aceite" & vbCr & "Filtro ")

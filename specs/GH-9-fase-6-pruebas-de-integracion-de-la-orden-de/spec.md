@@ -9,6 +9,7 @@
 - Verificación manual de lo que no corre oculto (`frmOrder`, los dos PDF, protección vista en Excel, `build.ps1` con y sin logo en `assets/`), con resultado anotado en `### Verificación manual` de Tasks.
 - Corrección de defectos chicos que salgan (pocas líneas, dentro de lo que tocaron #4 a #8), cada uno con su prueba.
 - Tres arreglos que ya salieron de una revisión manual previa: pie de los PDF (`TPL_PAGE` = `"Página &P"`; Excel en español guarda `&N` como `&F` y sale "Página 1 de Cotiva-Cotizador.xlsm"), crédito de innobytes cortado en `frmOrder` y `APP_VERSION` de 8.0.0 a 9.0.0 (`BD_Ordenes` y migración cambian la estructura del libro).
+- Diagnóstico que crece (T9): en la PlantillaOrden el diagnóstico ocupa de 1 a 8 filas reservadas (5 renglones del texto por fila, alto medido con `AutoFit`) y la orden pasa a una 2ª página si no cabe; `frmOrder` limita el diagnóstico a 40 renglones. La cotización sigue en una hoja.
 
 **No entra**
 - Entrega al cliente (migración, contraseña, firma, OneDrive): su propia issue.
@@ -16,17 +17,18 @@
 
 **Decisiones nuevas**
 - [N] Módulo de integración propio. Descartado: repartir los casos en `modTestData`/`modTestOrderQuote`, porque se pierde la lectura del flujo completo.
-- [N] "Una sola hoja" se prueba por configuración: tras `FillTemplate`/`FillOrderTemplate` el `PageSetup` sigue con `Zoom = False`, `FitToPagesWide = 1`, `FitToPagesTall = 1` y `PrintArea` no vacío. Descartado: contar páginas del PDF (`ExportSheetPdf` abre el archivo y puede mostrar `MsgBox`) o `PageSetup.Pages.Count` (depende de la impresora instalada).
+- [N] El ajuste de página se prueba por configuración: tras `FillTemplate` la Plantilla sigue con `Zoom = False`, `FitToPagesWide = 1`, `FitToPagesTall = 1`; tras `FillOrderTemplate` la PlantillaOrden queda con `FitToPagesWide = 1` y `FitToPagesTall = False` (las páginas que pida el alto); las dos con `PrintArea` no vacío. Descartado: contar páginas del PDF (`ExportSheetPdf` abre el archivo y puede mostrar `MsgBox`) o `PageSetup.Pages.Count` (depende de la impresora instalada).
+- [N] Diagnóstico en filas reservadas que se ocultan si sobran, como los conceptos de la Plantilla, y tope de 40 renglones en `frmOrder` (con 1000 caracteres, 40 renglones caben en dos hojas). Descartado: una sola celda con alto calculado (Excel no pasa de 409 pt por fila ni corta una fila entre páginas) e insertar filas al llenar (las celdas de condiciones y firmas cambiarían de lugar en cada orden).
 - [N] Las pruebas no llaman `ExportPdf`/`ExportOrderPdf`; el PDF real se revisa a mano.
 - [N] Pie solo con "Página &P": los dos PDF caben en una hoja, así que el total sobra. Descartado: buscar el código de total que acepte cada idioma de Excel.
 - [N] Crédito de `frmOrder` a 380 pt como en `frmQuote`, arriba de la barra inferior; para hacerle lugar las pestañas bajan de 342 a 324 pt de alto (su contenido termina en 274). Descartado: dejarlo entre los botones (solo caben 186 pt) o partirlo en dos renglones.
 - [N] Un defecto que no cabe en pocas líneas no se arregla aquí: se abre issue nueva y se anota en la verificación manual. Descartado: crecer esta tarea.
 
 **Riesgos**
-- El diagnóstico admite 1000 caracteres (`frmOrder`) y en la PlantillaOrden vive en `A23:H23` con alto fijo de 96 pt: un texto largo probablemente se corta en el PDF. Si pasa, aplica la regla anterior.
+- `AutoFit` mide en pantalla y el PDF puede salir un poco más alto: la columna de medición queda al 95 % del ancho del bloque para que sobre espacio. Las condiciones y firmas bajan de la fila 26-29 a la 33-36: un libro armado antes de T9 se reconstruye con `build.ps1` (la orden aún no se entrega a clientes).
 - Probar el build sin logo obliga a mover los archivos de `assets/`; hay que regresarlos antes del commit.
 
-**Tamaño:** ≈2 h, carril light; código de pruebas más los tres arreglos y los defectos chicos que salgan.
+**Tamaño:** ≈3 h, carril light; código de pruebas, los tres arreglos, el diagnóstico que crece (≈1 h) y los defectos chicos que salgan.
 
 ## Discovery
 
@@ -53,8 +55,8 @@ Todas las pruebas van en `src/tests/modTestIntegration.bas` (encabezado con el p
 - [x] **T4 · Cotización vieja sin orden.** `Test_Integracion_CotizacionViejaSinOrden`: `WriteLegacyQuoteRow`, `LoadQuote`, `FillTemplate`; `OrderNumber` vacío, `CELL_VEHICLE` vacía, `OrderBannerText` vacío y sin error registrado.
   - C4: CUANDO se carga una cotización de una versión anterior, el sistema DEBE llenarla sin vehículo y sin error.
 - [x] **T5 · Una sola hoja y diagnóstico largo.** `Test_Integracion_PlantillasUnaHoja`: tras `FillTemplate` (cotización con el tope de conceptos) y `FillOrderTemplate` (orden completa), las dos hojas conservan `Zoom = False`, `FitToPagesWide = 1`, `FitToPagesTall = 1` y `PrintArea` no vacío. `Test_Integracion_DiagnosticoLargoEnPlantilla`: orden con diagnóstico de 1000 caracteres con saltos de línea; `FillOrderTemplate` deja el texto completo en `CELL_ORD_DIAGNOSIS`.
-  - C5: CUANDO se llena cualquiera de las dos plantillas, el sistema DEBE conservar el ajuste a una página.
-  - C6: CUANDO el diagnóstico mide hasta 1000 caracteres, el sistema DEBE escribirlo completo en la PlantillaOrden.
+  - C5 (ajustado en T9): CUANDO se llena la Plantilla, el sistema DEBE conservar el ajuste a una página; CUANDO se llena la PlantillaOrden, DEBE ajustarla a una página de ancho y dejar que el alto ocupe las páginas que necesite.
+  - C6 (ajustado en T9): CUANDO el diagnóstico mide hasta 1000 caracteres, el sistema DEBE escribirlo completo en las filas del diagnóstico de la PlantillaOrden.
 - [x] **T6 · Hojas protegidas.** `Test_Integracion_HojasProtegidasTrasFlujo`: después de guardar una orden, pasarla a cotización y llenar las dos plantillas, `Plantilla`, `PlantillaOrden` y las `BD_*` existentes tienen `ProtectContents = True`; tras `ProtectAll` el libro tiene `ProtectStructure = True`.
   - C7: CUANDO termina cualquier flujo de la orden, el sistema DEBE dejar protegidas las plantillas y las hojas de datos.
 - [x] **T7 · Arreglos de la revisión previa.**
@@ -66,7 +68,31 @@ Todas las pruebas van en `src/tests/modTestIntegration.bas` (encabezado con el p
   - C12: CUANDO se construye el libro con la orden de servicio, el sistema DEBE reportar la versión 9.0.0 (hoja Inicio).
 - [x] **T8 · Verificación manual y cierre.** Corre `build\test.ps1` (todo en verde) y la lista de abajo; marca cada punto y anota en una línea lo que viste. Un defecto chico se corrige con su prueba en el módulo que corresponda; uno grande se abre como issue nueva y se anota aquí con su número.
   - C8: CUANDO se corre `build.ps1` con los logos en `assets/` y sin ellos, el sistema DEBE compilar sin diálogos de VBA y generar `dist/Cotiva-Cotizador.xlsm`.
-  - C9: CUANDO se exportan el PDF de una orden con diagnóstico largo y el de su cotización, cada uno DEBE salir en una sola hoja carta y legible.
+  - C9 (ajustado en T9): CUANDO se exporta el PDF de una cotización, DEBE salir en una sola hoja carta y legible. CUANDO se exporta el PDF de una orden, DEBE salir en una hoja si el diagnóstico cabe y, si no, en dos, con el diagnóstico completo, legible y numeradas "Página 1" y "Página 2".
+- [x] **T9 · Diagnóstico que crece y orden en dos hojas.** Sustituye el alto fijo de 200 pt de `A23` (arreglo anterior): con muchos renglones cortos el texto pasa de 13 renglones y se corta sin aviso.
+  - `src/modules/modConfig.bas`: `ORD_DIAG_FIRST_ROW As Long = 23`, `ORD_DIAG_ROWS As Long = 8`, `ORD_DIAG_LINES_PER_ROW As Long = 5`, `ORD_DIAG_MAX_LINES As Long = ORD_DIAG_ROWS * ORD_DIAG_LINES_PER_ROW` (= 40), `ORD_DIAG_MIN_HEIGHT As Double = 96`, `ORD_MEASURE_COLUMN As String = "J"`. `CELL_ORD_DIAGNOSIS` sigue en `"A23"` (primera fila). Lo de abajo baja 7 filas: `CELL_ORD_TERMS = "A33"`, firmas `"A35"`/`"D35"`/`"G35"`, `ORDER_PRINT_AREA = "$A$1:$H$36"`.
+  - `src/modules/modUtils.bas`, junto a `DiagnosisLines`:
+    - `Public Function TextLineCount(ByVal text As String) As Long`: une `vbCrLf`/`vbCr` en `vbLf`, quita los saltos del final y cuenta renglones, vacíos de en medio incluidos; `""` regresa 0.
+    - `Public Function DiagnosisChunks(ByVal diagnosisText As String) As Collection`: el mismo texto normalizado en grupos de `ORD_DIAG_LINES_PER_ROW` renglones unidos con `vbLf`; el grupo `ORD_DIAG_ROWS` se lleva todo lo que sobre (datos que no pasaron por `frmOrder`); texto vacío regresa una colección vacía. Unir los grupos con `vbLf` da el texto normalizado.
+  - `src/modules/modTemplate.bas`:
+    - `ConfigurePage` recibe `ByVal oneTallPage As Boolean`: True deja `FitToPagesTall = 1` (lo pasa `DesignTemplate`); False pone `FitToPagesTall = False` (lo pasa `DesignOrderTemplate`). `FitToPagesWide = 1` en los dos.
+    - `DesignOrderTemplate`: filas `ORD_DIAG_FIRST_ROW` a `ORD_DIAG_FIRST_ROW + ORD_DIAG_ROWS - 1` (23-30) con `AddOrderTextBlock`; la 23 a `ORD_DIAG_MIN_HEIGHT` y las 24-30 ocultas. Espacio en 31, condiciones en 32-33, firmas en 34-36 (las mismas alturas y formatos de hoy, siete filas abajo). Columna `ORD_MEASURE_COLUMN` (fuera del área de impresión) con letra de 10 pt, `WrapText` y ancho del 95 % de `Range("A23:H23").Width` (convertir puntos a `ColumnWidth` con la razón `Width / ColumnWidth` de la propia columna).
+    - `Private Sub FillOrderDiagnosis(ByVal ws As Worksheet, ByVal diagnosisText As String)`, que `FillOrderTemplate` llama en lugar de `PutOrderText ... CELL_ORD_DIAGNOSIS`: muestra y limpia las 8 filas; escribe cada grupo de `DiagnosisChunks` con `SafeCellText` en la columna A de su fila; para medir copia el grupo a `ORD_MEASURE_COLUMN` de esa fila, hace `Rows(r).AutoFit` y borra la copia; la fila 23 nunca queda por debajo de `ORD_DIAG_MIN_HEIGHT` y se ve aunque no haya diagnóstico; las filas sin grupo quedan ocultas.
+    - `ClearOrderContent` limpia también las 8 filas del diagnóstico.
+  - `src/forms/frmOrder.vba`, `SyncOrderFromForm`: si `TextLineCount(txtDiagnosis.Text) > ORD_DIAG_MAX_LINES`, `WarnOnPage` en la pestaña de `txtDiagnosis` con `Fmt(MSG_DIAGNOSIS_TOO_MANY_LINES, ORD_DIAG_MAX_LINES, <renglones>)` y no guarda. En `src/modules/modStrings.bas`: `MSG_DIAGNOSIS_TOO_MANY_LINES = "El diagnóstico admite hasta {0} renglones y tiene {1}. Junta o resume renglones."`
+  - `README.md`, sección de la orden: el diagnóstico admite 1000 caracteres y 40 renglones; si no cabe en la hoja, el PDF de la orden sale en dos.
+  - Pruebas en `src/tests/modTestOrderQuote.bas`: `Test_TextLineCount_CuentaRenglones` (`""`→0, `"a"`→1, `"a" & vbCrLf & "b"`→2, `"a" & vbLf & vbLf & "b"`→3, `"a" & vbLf`→1); `Test_DiagnosisChunks_CincoPorFila` (12 renglones → grupos de 5, 5 y 2; unidos dan el texto); `Test_DiagnosisChunks_UltimaFilaTomaElResto` (45 renglones → 8 grupos, el último con 10); `Test_DiagnosisChunks_Vacio` (0 grupos).
+  - Pruebas en `src/tests/modTestIntegration.bas` (con un auxiliar privado que une con `vbLf` el texto de las filas 23-30 no vacías):
+    - Se borra `Test_Integracion_DiagnosticoLargoCabeEnAlto` (probaba el alto fijo).
+    - `Test_Integracion_DiagnosticoLargoEnPlantilla` compara el texto unido de las filas en vez de `CELL_ORD_DIAGNOSIS`.
+    - `Test_Integracion_PlantillasUnaHoja` pasa a `Test_Integracion_AjusteDePagina`: la Plantilla como hoy; la PlantillaOrden con `Zoom = False`, `FitToPagesWide = 1`, `FitToPagesTall = False` y `PrintArea` igual a `ORDER_PRINT_AREA`.
+    - `Test_Integracion_DiagnosticoRenglonesCortosCrece`: 40 renglones cortos; filas 23-30 visibles, cada una con alto ≥ 5 × 12 pt, texto unido igual al original y sin error registrado.
+    - `Test_Integracion_DiagnosticoCortoOcultaSobrantes`: llena con 40 renglones y luego con 2; filas 24-30 ocultas y vacías, `A23` con los 2 renglones y alto `ORD_DIAG_MIN_HEIGHT`; con diagnóstico vacío, `A23` vacía y visible.
+    - `Test_Integracion_CondicionesYFirmasEnSuLugar`: `CELL_ORD_TERMS` desbloqueada y con texto; debajo de `CELL_ORD_SIGN_CLIENT` dice `TPL_CLIENT`; la columna `ORD_MEASURE_COLUMN` queda vacía tras `FillOrderTemplate`.
+  - C13: CUANDO el diagnóstico no cabe en la primera hoja, el sistema DEBE pasar el resto de la orden a una segunda hoja sin cortar texto.
+  - C14: CUANDO el diagnóstico tiene pocos renglones o ninguno, el sistema DEBE mostrar un solo bloque de al menos 96 pt y ocultar las filas que sobran.
+  - C15: CUANDO se intenta guardar en `frmOrder` un diagnóstico de más de 40 renglones, el sistema DEBE avisar en su pestaña y no guardar.
+  - C16: CUANDO se llena la PlantillaOrden, la cotización DEBE seguir saliendo en una hoja (C5).
 
 ### Verificación manual
 
@@ -90,3 +116,10 @@ Verificado tras T7 (sesión principal y humano):
 - [x] PDF de la orden con diagnóstico de 1000 caracteres: una hoja, texto completo visible.
 - [x] PDF de la cotización ligada: una hoja, con vehículo.
 - [x] En Excel, la protección impide escribir a mano en `Plantilla` y `PlantillaOrden` fuera de las celdas editables; las `BD_*` no se ven.
+
+Pendiente tras T9 (reemplaza la revisión del diagnóstico de 1000 caracteres de arriba):
+- [ ] `build.ps1` compila sin diálogos con la nueva PlantillaOrden.
+- [ ] PDF de una orden con 40 renglones cortos: dos hojas, diagnóstico completo, "Página 1" y "Página 2", condiciones y firmas sin cortar.
+- [ ] PDF de una orden con diagnóstico de 1000 caracteres en pocos renglones y de una sin diagnóstico: una hoja, como antes.
+- [ ] En `frmOrder`, un diagnóstico de 41 renglones avisa en su pestaña y no se guarda.
+- [ ] PDF de la cotización ligada: sigue en una hoja.

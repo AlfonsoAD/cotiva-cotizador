@@ -7,14 +7,38 @@ Attribute VB_Name = "modTestIntegration"
 '==============================================================================
 Option Explicit
 
-Private Sub AssertOneSheet(ByVal ws As Worksheet)
+Private Sub AssertPageFit(ByVal ws As Worksheet, ByVal oneTall As Boolean)
     With ws.PageSetup
         AssertTrue .Zoom = False, ws.Name & ": Zoom = False"
         AssertEqual 1, CLng(.FitToPagesWide), ws.Name & ": una pagina de ancho"
-        AssertEqual 1, CLng(.FitToPagesTall), ws.Name & ": una pagina de alto"
+        If oneTall Then
+            AssertEqual 1, CLng(.FitToPagesTall), ws.Name & ": una pagina de alto"
+        Else
+            AssertTrue .FitToPagesTall = False, ws.Name & ": alto libre"
+        End If
         AssertTrue Len(.PrintArea) > 0, ws.Name & ": area de impresion"
     End With
 End Sub
+
+' Texto de las filas del diagnostico no vacias, unido con vbLf.
+Private Function DiagnosisFromSheet(ByVal ws As Worksheet) As String
+    Dim r As Long, v As String
+    For r = ORD_DIAG_FIRST_ROW To ORD_DIAG_FIRST_ROW + ORD_DIAG_ROWS - 1
+        v = Replace(CStr(ws.Range("A" & r).Value), vbCrLf, vbLf)
+        If Len(v) > 0 Then
+            If Len(DiagnosisFromSheet) > 0 Then DiagnosisFromSheet = DiagnosisFromSheet & vbLf
+            DiagnosisFromSheet = DiagnosisFromSheet & v
+        End If
+    Next r
+End Function
+
+Private Function ShortLines(ByVal n As Long) As String
+    Dim i As Long
+    For i = 1 To n
+        If i > 1 Then ShortLines = ShortLines & vbLf
+        ShortLines = ShortLines & "Renglon " & i
+    Next i
+End Function
 
 Public Sub Test_Integracion_OrdenNuevaGuardarCargar()
     Dim folio As String, o As ServiceOrder, l As ServiceOrder
@@ -80,7 +104,7 @@ Public Sub Test_Integracion_CotizacionViejaSinOrden()
     AssertEqual "", OrderBannerText(q.OrderNumber, Nothing), "sin franja"
 End Sub
 
-Public Sub Test_Integracion_PlantillasUnaHoja()
+Public Sub Test_Integracion_AjusteDePagina()
     Dim q As Quote, i As Long
     Set q = NewSampleQuote("COT-1001")
     For i = 2 To MAX_ITEMS
@@ -88,10 +112,11 @@ Public Sub Test_Integracion_PlantillasUnaHoja()
     Next i
     FillTemplate q
     AssertEqual 0, LastErrorNumber(), "FillTemplate sin error"
-    AssertOneSheet ThisWorkbook.Worksheets(SHEET_TEMPLATE)
+    AssertPageFit ThisWorkbook.Worksheets(SHEET_TEMPLATE), True
     FillOrderTemplate NewSampleOrder("OS-0001")
     AssertEqual 0, LastErrorNumber(), "FillOrderTemplate sin error"
-    AssertOneSheet ThisWorkbook.Worksheets(SHEET_ORDER_TEMPLATE)
+    AssertPageFit ThisWorkbook.Worksheets(SHEET_ORDER_TEMPLATE), False
+    AssertEqual ORDER_PRINT_AREA, CStr(ThisWorkbook.Worksheets(SHEET_ORDER_TEMPLATE).PageSetup.PrintArea), "area de la orden"
 End Sub
 
 Public Sub Test_Integracion_DiagnosticoLargoEnPlantilla()
@@ -105,21 +130,58 @@ Public Sub Test_Integracion_DiagnosticoLargoEnPlantilla()
     o.Diagnosis = s
     FillOrderTemplate o
     AssertEqual 0, LastErrorNumber(), "sin error"
-    AssertEqual s, Replace(CStr(ThisWorkbook.Worksheets(SHEET_ORDER_TEMPLATE).Range(CELL_ORD_DIAGNOSIS).Value), vbCrLf, vbLf), "diagnostico completo"
+    AssertEqual s, DiagnosisFromSheet(ThisWorkbook.Worksheets(SHEET_ORDER_TEMPLATE)), "diagnostico completo"
 End Sub
 
-Public Sub Test_Integracion_DiagnosticoLargoCabeEnAlto()
-    Dim o As ServiceOrder, ws As Worksheet, s As String, i As Long
-    Do While Len(s) < 1000
-        i = i + 1
-        s = s & "Linea " & i & ": revisar sistema de frenos y suspension" & vbLf
-    Loop
+Public Sub Test_Integracion_DiagnosticoRenglonesCortosCrece()
+    Dim o As ServiceOrder, ws As Worksheet, t As String, r As Long
+    t = ShortLines(ORD_DIAG_MAX_LINES)
     Set o = NewSampleOrder("OS-0001")
-    o.Diagnosis = Left$(s, 1000)
+    o.Diagnosis = t
+    FillOrderTemplate o
+    AssertEqual 0, LastErrorNumber(), "sin error"
+    Set ws = ThisWorkbook.Worksheets(SHEET_ORDER_TEMPLATE)
+    For r = ORD_DIAG_FIRST_ROW To ORD_DIAG_FIRST_ROW + ORD_DIAG_ROWS - 1
+        AssertTrue Not ws.Rows(r).Hidden, "fila " & r & " visible"
+        AssertTrue ws.Rows(r).RowHeight >= ORD_DIAG_LINES_PER_ROW * 12, "fila " & r & " alcanza para 5 renglones"
+    Next r
+    AssertEqual t, DiagnosisFromSheet(ws), "texto completo"
+End Sub
+
+Public Sub Test_Integracion_DiagnosticoCortoOcultaSobrantes()
+    Dim o As ServiceOrder, ws As Worksheet, r As Long
+    Set o = NewSampleOrder("OS-0001")
+    o.Diagnosis = ShortLines(ORD_DIAG_MAX_LINES)
+    FillOrderTemplate o
+    o.Diagnosis = ShortLines(2)
+    FillOrderTemplate o
+    AssertEqual 0, LastErrorNumber(), "sin error"
+    Set ws = ThisWorkbook.Worksheets(SHEET_ORDER_TEMPLATE)
+    For r = ORD_DIAG_FIRST_ROW + 1 To ORD_DIAG_FIRST_ROW + ORD_DIAG_ROWS - 1
+        AssertTrue ws.Rows(r).Hidden, "fila " & r & " oculta"
+        AssertEqual "", CStr(ws.Range("A" & r).Value), "fila " & r & " vacia"
+    Next r
+    AssertEqual ShortLines(2), DiagnosisFromSheet(ws), "dos renglones"
+    AssertEqual ORD_DIAG_MIN_HEIGHT, CDbl(ws.Rows(ORD_DIAG_FIRST_ROW).RowHeight), "alto minimo"
+    o.Diagnosis = ""
+    FillOrderTemplate o
+    AssertEqual "", CStr(ws.Range(CELL_ORD_DIAGNOSIS).Value), "sin diagnostico"
+    AssertTrue Not ws.Rows(ORD_DIAG_FIRST_ROW).Hidden, "primera fila visible"
+    AssertEqual ORD_DIAG_MIN_HEIGHT, CDbl(ws.Rows(ORD_DIAG_FIRST_ROW).RowHeight), "alto minimo sin diagnostico"
+End Sub
+
+Public Sub Test_Integracion_CondicionesYFirmasEnSuLugar()
+    Dim o As ServiceOrder, ws As Worksheet, r As Long
+    Set o = NewSampleOrder("OS-0001")
+    o.Diagnosis = ShortLines(ORD_DIAG_MAX_LINES)
     FillOrderTemplate o
     Set ws = ThisWorkbook.Worksheets(SHEET_ORDER_TEMPLATE)
-    ' 1000 caracteres en renglones de 10 pt ocupan unos 15 pt por renglon (13 renglones)
-    AssertTrue ws.Rows(23).RowHeight >= 13 * 15, "el bloque del diagnostico alcanza para 1000 caracteres"
+    AssertTrue Not ws.Range(CELL_ORD_TERMS).Locked, "condiciones editables"
+    AssertTrue Len(CStr(ws.Range(CELL_ORD_TERMS).Value)) > 0, "condiciones con texto"
+    AssertEqual TPL_CLIENT, CStr(ws.Range(CELL_ORD_SIGN_CLIENT).Offset(1, 0).Value), "etiqueta de firma del cliente"
+    For r = ORD_DIAG_FIRST_ROW To ORD_DIAG_FIRST_ROW + ORD_DIAG_ROWS - 1
+        AssertEqual "", CStr(ws.Range(ORD_MEASURE_COLUMN & r).Value), "columna de medicion vacia, fila " & r
+    Next r
 End Sub
 
 Public Sub Test_Integracion_HojasProtegidasTrasFlujo()

@@ -677,6 +677,10 @@ Private Function SyncOrderFromForm() As Boolean
         WarnOnPage PAGE_SERVICE, MSG_TIME_INVALID, txtOutTime: Exit Function
     End If
 
+    If TextLineCount(txtDiagnosis.Text) > ORD_DIAG_MAX_LINES Then
+        WarnOnPage PAGE_SERVICE, Fmt(MSG_DIAGNOSIS_TOO_MANY_LINES, ORD_DIAG_MAX_LINES, TextLineCount(txtDiagnosis.Text)), txtDiagnosis: Exit Function
+    End If
+
     ' Number y QuoteNumber no se tocan: el folio lo asigna el sistema y la cotización ligada se conserva
     With mOrder
         .Status = Trim$(cboStatus.Text)

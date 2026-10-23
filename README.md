@@ -57,6 +57,10 @@ dist/          Salida del build (ignorada por Git)
 
 Los colores de B11 (principal) y B12 (secundario) de la hoja "Mi empresa" se aplican al formulario, a la portada (Inicio) y a la propia hoja "Mi empresa". La portada y la hoja se repintan al pulsar **Abrir cotizador**. Si B11 o B12 están vacías o no son un hexadecimal válido, se usan los colores de Cotiva.
 
+### Diagnóstico de la orden
+
+El diagnóstico admite 1000 caracteres y 40 renglones. La orden reserva el espacio que el texto necesite; si no cabe en una hoja, el PDF de la orden sale en dos hojas ("Página 1" y "Página 2"). La cotización siempre sale en una hoja.
+
 ### Pasar la orden a cotización
 
 En la orden, el botón **Pasar a cotización** guarda la orden (con las mismas validaciones que **Guardar**) y abre su cotización.
